@@ -1,0 +1,8 @@
+{% if admin.hasRoute('test') %}
+    <li>
+        <a class="sonata-action-element" href="{{ admin.generateObjectUrl('test', object) }}">
+            <i class="fa fa-check" aria-hidden="true"></i>
+            Test
+        </a>
+    </li>
+{% endif %}

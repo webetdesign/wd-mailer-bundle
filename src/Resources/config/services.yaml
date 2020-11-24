@@ -1,0 +1,16 @@
+services:
+  _defaults:
+    autowire: true      # Automatically injects dependencies in your services.
+    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+  _instanceof:
+    WebEtDesign\MailerBundle\Transport\MailTransportInterface:
+      tags: [ 'mailer.transport' ]
+
+  WebEtDesign\MailerBundle\:
+    resource: '../../*'
+    exclude: '../../{DependencyInjection,Controller,Entity,Migrations,Tests,Kernel.php}'
+
+  WebEtDesign\MailerBundle\Controller\:
+    resource: '../../Controller/*'
+    tags: [ 'controller.service_arguments' ]

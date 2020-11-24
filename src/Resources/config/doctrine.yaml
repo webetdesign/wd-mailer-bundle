@@ -1,0 +1,3 @@
+services:
+  WebEtDesign\MailerBundle\Model\MailManagerInterface:
+    alias: WebEtDesign\MailerBundle\Doctrine\MailManager
