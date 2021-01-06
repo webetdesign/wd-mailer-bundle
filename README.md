@@ -42,6 +42,14 @@ norzechowicz_ace_editor:
   base_path: "http://rawgithub.com/ajaxorg/ace-builds/master"
 ```
 
+Register routes
+
+```yaml 
+# config/routes/wd_mailer.yaml
+wd_mailer:
+  resource: "@WDMailerBundle/Resources/config/routes.yaml"
+```
+
 ## Mail
 
 - **Name** : Name of the email (use only in BO)

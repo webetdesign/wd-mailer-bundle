@@ -50,7 +50,7 @@ class MailerListener
             $transport->send($mail, $values, $this->getRecipients($mail, $values));
         }
     }
-
+    
     private function getRecipients(Mail $mail, $values)
     {
         $to = $mail->getToAsArray();

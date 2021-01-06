@@ -34,13 +34,13 @@ class WDMailerExtension extends Extension
         if (isset($bundles['SonataAdminBundle'])) {
             $loader->load('admin.yaml');
         }
-        
+
         $service = $container->getDefinition('WebEtDesign\MailerBundle\EventListener\MailerListener');
 
         foreach ($config['events'] as $key => $event) {
             $service->addTag('kernel.event_listener', ['event' => $key]);
         }
-        
+
         $loader->load('doctrine.yaml');
     }
 }

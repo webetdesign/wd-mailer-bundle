@@ -60,6 +60,11 @@ class Mail
      */
     private ?string $attachments = null;
 
+    /**
+     * @ORM\Column(type="boolean", nullable=false)
+     */
+    private bool $online;
+
     public function __toString()
     {
         return $this->getName();
@@ -172,6 +177,24 @@ class Mail
     {
         $this->attachments = $attachments;
 
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isOnline(): bool
+    {
+        return $this->online;
+    }
+
+    /**
+     * @param bool $online
+     * @return Mail
+     */
+    public function setOnline(bool $online): Mail
+    {
+        $this->online = $online;
         return $this;
     }
 }

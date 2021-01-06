@@ -11,6 +11,7 @@ use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Route\RouteCollection;
 use Sonata\AdminBundle\Show\ShowMapper;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 final class MailAdmin extends AbstractAdmin
@@ -80,6 +81,11 @@ final class MailAdmin extends AbstractAdmin
             ->add('name')
             ->add('event', ChoiceType::class, [
                 'choices' => $this->getMailEventsChoices()
+            ])
+            ->add('online', CheckboxType::class, [
+                'help' => 'Permets d’enregistrer les mails pour le visualiser en ligne. <br>' .
+                    'Ajouter dans le template HTML un lien avec comme href : <code>{{ ONLINE_LINK }}</code>',
+                'required' => false,
             ])
             ->end()
             ->with('', ['class' => 'col-md-6', 'box_class' => 'box box-primary box-no-header'])
