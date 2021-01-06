@@ -3,6 +3,7 @@
 namespace WebEtDesign\MailerBundle\Util;
 
 use ReflectionClass;
+use ReflectionFunction;
 use ReflectionMethod;
 
 class ObjectConverter
@@ -27,6 +28,32 @@ class ObjectConverter
         }
 
         return $values;
+    }
+
+    public static function getAvailableMethods($object)
+    {
+        if (!$object) {
+            return [];
+        }
+
+        $methods = [];
+
+        $classReflex = new ReflectionClass($object);
+
+        foreach ($classReflex->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            if (0 !== strpos($method->getName(), "get")) {
+                continue;
+            }
+
+            $ret = 'Undefined';
+            if ($method->hasReturnType()) {
+                $ret = $method->getReturnType()->getName() . ($method->getReturnType()->allowsNull() ? '|null' : '');
+            }
+
+            $methods[lcfirst(str_replace('get', '', $method->getName()))] = $ret;
+        }
+
+        return $methods;
     }
 
 }

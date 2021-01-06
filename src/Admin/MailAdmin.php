@@ -13,6 +13,10 @@ use Sonata\AdminBundle\Route\RouteCollection;
 use Sonata\AdminBundle\Show\ShowMapper;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use WebEtDesign\MailerBundle\Entity\Mail;
+use WebEtDesign\MailerBundle\Form\TplParametersType;
+use WebEtDesign\MailerBundle\Util\ObjectConverter;
 
 final class MailAdmin extends AbstractAdmin
 {
@@ -62,18 +66,28 @@ final class MailAdmin extends AbstractAdmin
             ->add('from')
             ->add('_action', null, [
                 'actions' => [
-//                    'show'   => [],
-'edit'   => [],
-'delete' => [],
-'test'   => [
-    'template' => '@WDMailer/admin/mail/list__action_test.html.twig',
-],
+                    //                    'show'   => [],
+                    'edit'   => [],
+                    'delete' => [],
+                    'test'   => [
+                        'template' => '@WDMailer/admin/mail/list__action_test.html.twig',
+                    ],
                 ],
             ]);
     }
 
     protected function configureFormFields(FormMapper $formMapper): void
     {
+        $this->setFormTheme(array_merge($this->getFormTheme(), [
+            '@WDMailer/admin/form/wd_mailer_tpl_params.html.twig'
+        ]));
+
+        /** @var Mail $subject */
+        $subject = $this->getSubject();
+        if ($subject && $subject->getEvent()) {
+            $event       = $this->getMailEvents()[$subject->getEvent()]['class'];
+            $eventParams = ObjectConverter::getAvailableMethods($event);
+        }
 
         $formMapper
             ->tab('Général')
@@ -83,7 +97,7 @@ final class MailAdmin extends AbstractAdmin
                 'choices' => $this->getMailEventsChoices()
             ])
             ->add('online', CheckboxType::class, [
-                'help' => 'Permets d’enregistrer les mails pour le visualiser en ligne. <br>' .
+                'help'     => 'Permets d’enregistrer les mails pour le visualiser en ligne. <br>' .
                     'Ajouter dans le template HTML un lien avec comme href : <code>{{ ONLINE_LINK }}</code>',
                 'required' => false,
             ])
@@ -99,24 +113,41 @@ final class MailAdmin extends AbstractAdmin
             ->end()
             ->end()
             ->tab('HTML')
-            ->with('', ['class' => 'col-md-12', 'box_class' => 'box box-primary box-no-header'])
+            ->with('Contenu HTML',
+                ['class' => 'col-md-8', 'box_class' => 'box box-primary box-no-header'])
             ->add('contentHtml', AceEditorType::class, [
-                'label'  => 'Contenu HTML',
+                'label'  => false,
                 'width'  => '100%',
                 'height' => '1000px',
                 'mode'   => 'ace/mode/twig',
                 'theme'  => 'ace/theme/monokai',
             ])
             ->end()
+            ->with('Paramètres',
+                ['class' => 'col-md-4', 'box_class' => 'box box-primary box-no-header'])
+            ->add('paramsHtml', TplParametersType::class, [
+                'mapped' => false,
+                'label'  => false,
+                'params' => $eventParams ?? [],
+            ])
+            ->end()
             ->end()
             ->tab('Texte')
-            ->with('', ['class' => 'col-md-12', 'box_class' => 'box box-primary box-no-header'])
+            ->with('', ['class' => 'col-md-8', 'box_class' => 'box box-primary box-no-header'])
             ->add('contentTxt', AceEditorType::class, [
                 'label'  => 'Contenu Text',
                 'width'  => '100%',
                 'height' => '1000px',
                 'mode'   => 'ace/mode/twig',
                 'theme'  => 'ace/theme/monokai',
+            ])
+            ->end()
+            ->with('Paramètres',
+                ['class' => 'col-md-4', 'box_class' => 'box box-primary box-no-header'])
+            ->add('paramsTxt', TplParametersType::class, [
+                'mapped' => false,
+                'label'  => false,
+                'params' => $eventParams ?? [],
             ])
             ->end()
             ->end()//            ->add('attachments')
@@ -150,7 +181,7 @@ final class MailAdmin extends AbstractAdmin
      */
     public function getMailEventsChoices()
     {
-        $events = $this->getMailEvents();
+        $events  = $this->getMailEvents();
         $choices = [];
         foreach ($events as $key => $event) {
             $choices[$key] = $event['label'] ?? $key;

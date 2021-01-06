@@ -1,0 +1,18 @@
+{% block wd_mailer_tpl_params_widget %}
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Valeur</th>
+            <th>Type de retour</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for name, return in params %}
+            <tr>
+                <td>{{ name }}</td>
+                <td>{{ return }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
