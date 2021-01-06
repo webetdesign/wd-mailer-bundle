@@ -11,9 +11,13 @@ use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Route\RouteCollection;
 use Sonata\AdminBundle\Show\ShowMapper;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 final class MailAdmin extends AbstractAdmin
 {
+
+    private $mailEvents;
+
     protected function configureRoutes(RouteCollection $collection): void
     {
         $collection->add('test', 'test/{id}');
@@ -69,17 +73,21 @@ final class MailAdmin extends AbstractAdmin
 
     protected function configureFormFields(FormMapper $formMapper): void
     {
+
         $formMapper
             ->tab('Général')
             ->with('#', ['class' => 'col-md-6', 'box_class' => 'box box-primary box-no-header'])
             ->add('name')
-            ->add('event')
+            ->add('event', ChoiceType::class, [
+                'choices' => $this->getMailEventsChoices()
+            ])
             ->end()
             ->with('', ['class' => 'col-md-6', 'box_class' => 'box box-primary box-no-header'])
             ->add('from', null, ['label' => 'De'])
             ->add('to', null, [
                 'label' => 'Destinataire(s)',
-                'help'  => 'Un ou plusieurs emails séparés par des virgules ou des retours ligne.',
+                'help'  => 'Un ou plusieurs emails séparés par des virgules ou des retours ligne.<br>' .
+                    'Les variables sont également acceptées sous cette syntaxe : __email__ ou __user.email__.<br>',
             ])
             ->add('title', null, ['label' => 'Objet'])
             ->end()
@@ -121,5 +129,37 @@ final class MailAdmin extends AbstractAdmin
             ->add('contentHtml')
             ->add('contentTxt')
             ->add('attachments');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMailEvents()
+    {
+        return $this->mailEvents;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMailEventsChoices()
+    {
+        $events = $this->getMailEvents();
+        $choices = [];
+        foreach ($events as $key => $event) {
+            $choices[$key] = $event['label'] ?? $key;
+        }
+
+        return array_flip($choices);
+    }
+
+    /**
+     * @param mixed $mailEvents
+     * @return MailAdmin
+     */
+    public function setMailEvents($mailEvents)
+    {
+        $this->mailEvents = $mailEvents;
+        return $this;
     }
 }

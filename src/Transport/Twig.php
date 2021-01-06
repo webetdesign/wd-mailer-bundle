@@ -25,25 +25,6 @@ class Twig implements MailTransportInterface
             $this->twig->disableStrictVariables();
         }
 
-        $to = $to ?? $mail->getToAsArray();
-        if (!$to) {
-            throw new MailTransportException('No destination found');
-        }
-        $to = !is_array($to) ? [$to] : $to;
-        foreach ($to as $k => $item) {
-            if (!preg_match('/^__(.*)__$/', $item, $matches)) {
-                continue;
-            }
-
-            unset($to[$k]);
-            $dest = $values[$matches[1]] ?? [];
-            if (is_array($dest)) {
-                $to = [...$to, ...$dest];
-            } else {
-                $to[] = $dest;
-            }
-        }
-
         $tpl     = $this->twig->createTemplate($mail->getContentHtml());
         $content = $tpl->render($values ?? []);
 

@@ -24,6 +24,24 @@ Add the repo to your composer.json
 composer require webetdesign/wd-mailer-bundle
 ```
 
+Register the bundles in `config/bundles.php`
+
+``` php 
+return [
+    ...
+    WebEtDesign\MailerBundle\WDMailerBundle::class => ['all' => true],
+    Norzechowicz\AceEditorBundle\NorzechowiczAceEditorBundle::class => ['all' => true],
+    ...
+];
+```
+
+Create the file `config/packages/norzechowicz_ace_editor.yaml`
+
+``` yaml
+norzechowicz_ace_editor:
+  base_path: "http://rawgithub.com/ajaxorg/ace-builds/master"
+```
+
 ## Mail
 
 - **Name** : Name of the email (use only in BO)
@@ -74,14 +92,23 @@ The use of the constant "NAME" allows to use an alias instead of the FQCN.
 Each getter will be used to determine the name of a variable in the template. In this example, there will be 2 variables, "user" and "email" that will be directly injected in the template.
 
 ## Listener
-To use the events in the listener, you have to add the service with tags like this one
+
+Register events in `config/package/wd_mailer.yaml`
+
 ```yaml
-services:
-    WebEtDesign\MailerBundle\EventListener\MailerListener:
-        tags:
-            - { name: kernel.event_listener, event: user.created }
+wd_mailer: 
+    events:
+      user.created:
+        label: On user creation
+        class: App\Event\UserCreateEvent
 ```
-where "event" is the name of the event
+
+## Dispatch event
+
+``` php 
+    $event = new UserCreateEvent($this->getUser());
+    $eventDispatcher->dispatch($event, UserCreateEvent::NAME);
+```
 
 ## Evolution 
 

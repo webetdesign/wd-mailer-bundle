@@ -7,3 +7,4 @@ services:
     public: true
     calls:
       - [ setTemplate, [ 'button_test', '@@WDMailer/admin/mail/test_button.html.twig' ] ]
+      - [ setMailEvents, ['%mailer.events%'] ]

@@ -10,6 +10,7 @@ use WebEtDesign\MailerBundle\Model\MailManagerInterface;
 use WebEtDesign\MailerBundle\Transport\MailTransportInterface;
 use WebEtDesign\MailerBundle\Transport\TransportChain;
 use WebEtDesign\MailerBundle\Util\ObjectConverter;
+use WebEtDesign\MailerBundle\Entity\Mail;
 
 class MailerListener
 {
@@ -46,7 +47,46 @@ class MailerListener
                 throw new MailTransportException('Mail transport not found');
             }
 
-            $transport->send($mail, $values);
+            $transport->send($mail, $values, $this->getRecipients($mail, $values));
         }
+    }
+
+    private function getRecipients(Mail $mail, $values)
+    {
+        $to = $mail->getToAsArray();
+        if (!$to) {
+            throw new MailTransportException('No destination found');
+        }
+        $to = !is_array($to) ? [$to] : $to;
+        foreach ($to as $k => $item) {
+            if (!preg_match('/^__(.*)__$/', $item, $matches)) {
+                continue;
+            }
+
+            unset($to[$k]);
+
+            $split = explode('.', $matches[1]);
+            $dest  = $values[array_shift($split)] ?? [];
+
+
+            foreach ($split as $item) {
+                $method = 'get' . ucfirst($item);
+                if (!method_exists($dest, $method)) {
+                    $dest = null;
+                    break;
+                }
+                $dest = $dest->$method();
+            }
+
+            if ($dest) {
+                if (is_array($dest)) {
+                    $to = [...$to, ...$dest];
+                } else {
+                    $to[] = $dest;
+                }
+            }
+        }
+
+        return $to;
     }
 }

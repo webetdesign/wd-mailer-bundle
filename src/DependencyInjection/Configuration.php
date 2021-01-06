@@ -33,6 +33,7 @@ class Configuration implements ConfigurationInterface
                     ->arrayPrototype()
                         ->children()
                             ->scalarNode('class')->end()
+                            ->scalarNode('label')->end()
                         ->end()
                     ->end()
                 ->end()
