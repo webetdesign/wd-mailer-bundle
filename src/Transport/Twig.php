@@ -39,7 +39,7 @@ class Twig implements MailTransportInterface
             $this->twig->disableStrictVariables();
         }
 
-        $hash = hash('sha256', $mail->getId() . $mail->getFrom() . $mail->getTitle());
+        $hash = hash('sha256', $mail->getId() . $mail->getFrom() . $mail->getTitle() . time());
         $online_link = $this->router->generate('wd_mailer_mail_view', ['hash' => $hash], UrlGeneratorInterface::ABSOLUTE_URL);
 
         if ($mail->isOnline()) {
@@ -48,6 +48,9 @@ class Twig implements MailTransportInterface
 
         $tpl     = $this->twig->createTemplate($mail->getContentHtml());
         $content = $tpl->render($values ?? []);
+
+        $tpl     = $this->twig->createTemplate($mail->getContentTxt());
+        $contentTxt = $tpl->render($values ?? []);
 
         if ($mail->isOnline()) {
             $om = new MailOnline();
@@ -64,7 +67,8 @@ class Twig implements MailTransportInterface
             ->setBody(
                 $content,
                 'text/html'
-            );
+            )
+            ->addPart($contentTxt, 'text/plain');
 
         $this->mailer->send($message);
     }
