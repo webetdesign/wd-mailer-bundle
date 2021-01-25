@@ -33,7 +33,7 @@ class Twig implements MailTransportInterface
         $this->em = $em;
     }
 
-    public function send(Mail $mail, $values = null, $to = null): void
+    public function send(Mail $mail, $values = null, $to = null): ?int
     {
         if (!$values) {
             $this->twig->disableStrictVariables();
@@ -70,6 +70,6 @@ class Twig implements MailTransportInterface
             )
             ->addPart($contentTxt, 'text/plain');
 
-        $this->mailer->send($message);
+        return $this->mailer->send($message);
     }
 }

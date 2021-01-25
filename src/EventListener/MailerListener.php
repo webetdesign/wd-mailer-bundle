@@ -2,6 +2,7 @@
 
 namespace WebEtDesign\MailerBundle\EventListener;
 
+use Psr\Log\LoggerInterface;
 use ReflectionClassConstant;
 use ReflectionException;
 use Symfony\Contracts\EventDispatcher\Event;
@@ -18,10 +19,13 @@ class MailerListener
 
     private TransportChain $transports;
 
-    public function __construct(MailManagerInterface $manager, TransportChain $transports)
+    private LoggerInterface $logger;
+
+    public function __construct(MailManagerInterface $manager, TransportChain $transports, LoggerInterface $logger)
     {
         $this->manager    = $manager;
         $this->transports = $transports;
+        $this->logger = $logger;
     }
 
     public function __invoke(Event $event)
@@ -47,10 +51,17 @@ class MailerListener
                 throw new MailTransportException('Mail transport not found');
             }
 
-            $transport->send($mail, $values, $this->getRecipients($mail, $values));
+            $res = $transport->send($mail, $values, $this->getRecipients($mail, $values));
+            $this->logger->info("Event " . $name . ' catch by mail listener, res = ' . $res);
         }
     }
-    
+
+    /**
+     * @param Mail $mail
+     * @param $values
+     * @return array
+     * @throws MailTransportException
+     */
     private function getRecipients(Mail $mail, $values)
     {
         $to = $mail->getToAsArray();
