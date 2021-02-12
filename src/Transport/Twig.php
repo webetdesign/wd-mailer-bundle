@@ -14,7 +14,7 @@ use WebEtDesign\MailerBundle\Exception\MailTransportException;
 
 class Twig implements MailTransportInterface
 {
-    private Environment $twig;
+    private Environment  $twig;
     private Swift_Mailer $mailer;
     /**
      * @var RouterInterface
@@ -25,12 +25,16 @@ class Twig implements MailTransportInterface
      */
     private $em;
 
-    public function __construct(Environment $twig, Swift_Mailer $mailer, RouterInterface $router, EntityManagerInterface $em)
-    {
+    public function __construct(
+        Environment $twig,
+        Swift_Mailer $mailer,
+        RouterInterface $router,
+        EntityManagerInterface $em
+    ) {
         $this->twig   = $twig;
         $this->mailer = $mailer;
         $this->router = $router;
-        $this->em = $em;
+        $this->em     = $em;
     }
 
     public function send(Mail $mail, $values = null, $to = null): ?int
@@ -39,8 +43,10 @@ class Twig implements MailTransportInterface
             $this->twig->disableStrictVariables();
         }
 
-        $hash = hash('sha256', $mail->getId() . $mail->getFrom() . $mail->getTitle() . time());
-        $online_link = $this->router->generate('wd_mailer_mail_view', ['hash' => $hash], UrlGeneratorInterface::ABSOLUTE_URL);
+        $hash        = hash('sha256',
+            $mail->getId() . $mail->getFrom() . $mail->getTitle() . time());
+        $online_link = $this->router->generate('wd_mailer_mail_view', ['hash' => $hash],
+            UrlGeneratorInterface::ABSOLUTE_URL);
 
         if ($mail->isOnline()) {
             $values['ONLINE_LINK'] = $online_link;
@@ -49,8 +55,10 @@ class Twig implements MailTransportInterface
         $tpl     = $this->twig->createTemplate($mail->getContentHtml());
         $content = $tpl->render($values ?? []);
 
-        $tpl     = $this->twig->createTemplate($mail->getContentTxt());
-        $contentTxt = $tpl->render($values ?? []);
+        if (!empty($mail->getContentTxt())) {
+            $tpl        = $this->twig->createTemplate($mail->getContentTxt());
+            $contentTxt = $tpl->render($values ?? []);
+        }
 
         if ($mail->isOnline()) {
             $om = new MailOnline();
@@ -67,8 +75,11 @@ class Twig implements MailTransportInterface
             ->setBody(
                 $content,
                 'text/html'
-            )
-            ->addPart($contentTxt, 'text/plain');
+            );
+        
+        if (isset($contentTxt)) {
+            $message->addPart($contentTxt, 'text/plain');
+        }
 
         return $this->mailer->send($message);
     }
