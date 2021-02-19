@@ -38,7 +38,7 @@ class WDMailerExtension extends Extension
         $service = $container->getDefinition('WebEtDesign\MailerBundle\EventListener\MailerListener');
 
         foreach ($config['events'] as $key => $event) {
-            $service->addTag('kernel.event_listener', ['event' => $key]);
+            $service->addTag('kernel.event_listener', ['event' => $key, 'priority' => $event['priority']]);
         }
 
         $loader->load('doctrine.yaml');
