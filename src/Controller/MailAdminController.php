@@ -28,7 +28,7 @@ final class MailAdminController extends CRUDController
         if ($form->isSubmitted() && $form->isValid()) {
             $transport = $this->transportChain->get('twig');
             if ($transport) {
-                $transport->send($mail, null, $form->getData()['email']);
+                $transport->send($mail, $form->getData()['locale'], null, $form->getData()['email']);
             }
         }
 

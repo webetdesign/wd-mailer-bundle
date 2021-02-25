@@ -1,10 +1,14 @@
 services:
   admin.mail:
     class: WebEtDesign\MailerBundle\Admin\MailAdmin
-    arguments: [~, WebEtDesign\MailerBundle\Entity\Mail, WebEtDesign\MailerBundle\Controller\MailAdminController]
+    arguments:
+      - ~
+      - WebEtDesign\MailerBundle\Entity\Mail
+      - WebEtDesign\MailerBundle\Controller\MailAdminController
+      - '@parameter_bag'
     tags:
       - { name: sonata.admin, manager_type: orm, group: CMS, label: Mail }
     public: true
     calls:
       - [ setTemplate, [ 'button_test', '@@WDMailer/admin/mail/test_button.html.twig' ] ]
-      - [ setMailEvents, ['%mailer.events%'] ]
+      - [ setMailEvents, ['%wd_mailer.events%'] ]

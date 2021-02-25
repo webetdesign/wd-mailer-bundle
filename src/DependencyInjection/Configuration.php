@@ -28,6 +28,10 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
+                ->scalarNode('default_locale')->isRequired()->end()
+                ->arrayNode('locales')
+                    ->scalarPrototype()->isRequired()->end()
+                ->end()
                 ->arrayNode('events')
                     ->useAttributeAsKey('name')
                     ->arrayPrototype()

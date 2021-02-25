@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WebEtDesign\MailerBundle\Admin;
 
+use A2lix\TranslationFormBundle\Form\Type\TranslationsFormsType;
+use A2lix\TranslationFormBundle\Form\Type\TranslationsType;
 use Norzechowicz\AceEditorBundle\Form\Extension\AceEditor\Type\AceEditorType;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
@@ -11,15 +13,39 @@ use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Route\RouteCollection;
 use Sonata\AdminBundle\Show\ShowMapper;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use WebEtDesign\MailerBundle\Entity\Mail;
+use WebEtDesign\MailerBundle\Entity\MailTranslation;
+use WebEtDesign\MailerBundle\Form\Admin\MailContentHtmlTranslationType;
+use WebEtDesign\MailerBundle\Form\Admin\MailContentTextTranslationType;
+use WebEtDesign\MailerBundle\Form\Admin\MailTitleTranslationType;
 use WebEtDesign\MailerBundle\Form\TplParametersType;
 use WebEtDesign\MailerBundle\Util\ObjectConverter;
 
 final class MailAdmin extends AbstractAdmin
 {
+    /**
+     * @var ParameterBagInterface
+     */
+    private ParameterBagInterface $parameterBag;
+
+    /**
+     * @inheritDoc
+     */
+    public function __construct(
+        $code,
+        $class,
+        $baseControllerName = null,
+        ParameterBagInterface $parameterBag
+    ) {
+        parent::__construct($code, $class, $baseControllerName);
+        $this->parameterBag = $parameterBag;
+    }
+
 
     private $mailEvents;
 
@@ -78,6 +104,9 @@ final class MailAdmin extends AbstractAdmin
 
     protected function configureFormFields(FormMapper $formMapper): void
     {
+        $locales = $this->parameterBag->get('wd_mailer.locales');
+        $locale  = $this->parameterBag->get('wd_mailer.default_locale');
+
         $this->setFormTheme(array_merge($this->getFormTheme(), [
             '@WDMailer/admin/form/wd_mailer_tpl_params.html.twig'
         ]));
@@ -101,26 +130,44 @@ final class MailAdmin extends AbstractAdmin
                     'Ajouter dans le template HTML un lien avec comme href : <code>{{ ONLINE_LINK }}</code>',
                 'required' => false,
             ])
-            ->end()
+            ->end();
+
+        $formMapper
             ->with('', ['class' => 'col-md-6', 'box_class' => 'box box-primary box-no-header'])
             ->add('from', null, ['label' => 'De'])
             ->add('to', null, [
                 'label' => 'Destinataire(s)',
                 'help'  => 'Un ou plusieurs emails séparés par des virgules ou des retours ligne.<br>' .
                     'Les variables sont également acceptées sous cette syntaxe : __email__ ou __user.email__.<br>',
+            ]);
+
+        $fieldDescription = $this
+            ->getModelManager()
+            ->getNewFieldDescriptionInstance(MailTranslation::class, 'translations', [
+            ]);
+
+        $formMapper
+            //            ->add('title', null, ['label' => 'Objet'])
+            ->add('translationsTitle', TranslationsFormsType::class, [
+                'label'          => false,
+                'locales'        => $locales,
+                'default_locale' => [$locale],
+                'form_type'      => MailTitleTranslationType::class
+
             ])
-            ->add('title', null, ['label' => 'Objet'])
             ->end()
-            ->end()
+            ->end();
+
+        $formMapper
             ->tab('HTML')
             ->with('Contenu HTML',
                 ['class' => 'col-md-8', 'box_class' => 'box box-primary box-no-header'])
-            ->add('contentHtml', AceEditorType::class, [
-                'label'  => false,
-                'width'  => '100%',
-                'height' => '1000px',
-                'mode'   => 'ace/mode/twig',
-                'theme'  => 'ace/theme/monokai',
+
+            ->add('translationsContentHtml', TranslationsFormsType::class, [
+                'label'          => false,
+                'locales'        => $locales,
+                'default_locale' => [$locale],
+                'form_type'      => MailContentHtmlTranslationType::class
             ])
             ->end()
             ->with('Paramètres',
@@ -131,15 +178,17 @@ final class MailAdmin extends AbstractAdmin
                 'params' => $eventParams ?? [],
             ])
             ->end()
-            ->end()
+            ->end();
+
+        $formMapper
             ->tab('Texte')
             ->with('', ['class' => 'col-md-8', 'box_class' => 'box box-primary box-no-header'])
-            ->add('contentTxt', AceEditorType::class, [
-                'label'  => 'Contenu Text',
-                'width'  => '100%',
-                'height' => '1000px',
-                'mode'   => 'ace/mode/twig',
-                'theme'  => 'ace/theme/monokai',
+
+            ->add('translationsContentText', TranslationsFormsType::class, [
+                'label'          => false,
+                'locales'        => $locales,
+                'default_locale' => [$locale],
+                'form_type'      => MailContentTextTranslationType::class
             ])
             ->end()
             ->with('Paramètres',

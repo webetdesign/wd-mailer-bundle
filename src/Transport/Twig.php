@@ -5,6 +5,7 @@ namespace WebEtDesign\MailerBundle\Transport;
 use Doctrine\ORM\EntityManagerInterface;
 use Swift_Mailer;
 use Swift_Message;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Twig\Environment;
@@ -24,24 +25,36 @@ class Twig implements MailTransportInterface
      * @var EntityManagerInterface
      */
     private $em;
+    /**
+     * @var ParameterBagInterface
+     */
+    private ParameterBagInterface $parameterBag;
 
     public function __construct(
         Environment $twig,
         Swift_Mailer $mailer,
         RouterInterface $router,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        ParameterBagInterface $parameterBag
     ) {
-        $this->twig   = $twig;
-        $this->mailer = $mailer;
-        $this->router = $router;
-        $this->em     = $em;
+        $this->twig         = $twig;
+        $this->mailer       = $mailer;
+        $this->router       = $router;
+        $this->em           = $em;
+        $this->parameterBag = $parameterBag;
     }
 
-    public function send(Mail $mail, $values = null, $to = null): ?int
+    public function send(Mail $mail, $locale = null, $values = null, $to = null): ?int
     {
         if (!$values) {
             $this->twig->disableStrictVariables();
         }
+
+        if (!$locale) {
+            $locale = $this->parameterBag->get('wd_mailer.default_locale');
+        }
+
+        $mail->setCurrentLocale($locale);
 
         $hash        = hash('sha256',
             $mail->getId() . $mail->getFrom() . $mail->getTitle() . time());
@@ -76,7 +89,7 @@ class Twig implements MailTransportInterface
                 $content,
                 'text/html'
             );
-        
+
         if (isset($contentTxt)) {
             $message->addPart($contentTxt, 'text/plain');
         }

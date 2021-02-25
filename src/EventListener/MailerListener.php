@@ -44,6 +44,7 @@ class MailerListener
         }
 
         $values = ObjectConverter::convertToArray($event);
+        $locale = method_exists(get_class($event), 'getLocale') ? $event->getLocale() : null;
         foreach ($mails as $mail) {
             $type      = 'twig'; // @TODO replace by mail type transport
             $transport = $this->transports->get($type);
@@ -51,7 +52,7 @@ class MailerListener
                 throw new MailTransportException('Mail transport not found');
             }
 
-            $res = $transport->send($mail, $values, $this->getRecipients($mail, $values));
+            $res = $transport->send($mail, $locale, $values, $this->getRecipients($mail, $values));
             $this->logger->info("Event " . $name . ' catch by mail listener, res = ' . $res);
         }
     }

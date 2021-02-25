@@ -3,6 +3,9 @@
 namespace WebEtDesign\MailerBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
+use Knp\DoctrineBehaviors\Model\Translatable\TranslatableTrait;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
  * Class Mail
@@ -10,9 +13,14 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @ORM\Entity
  * @ORM\Table(name="mailer__mail")
+ * @method string getTitle()
+ * @method string getContentHtml()
+ * @method null|string getContentTxt()
  */
-class Mail
+class Mail implements TranslatableInterface
 {
+    use TranslatableTrait;
+
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")
@@ -41,21 +49,6 @@ class Mail
     private string $from = '';
 
     /**
-     * @ORM\Column(type="string", nullable=false, name="title")
-     */
-    private ?string $title = null;
-
-    /**
-     * @ORM\Column(type="text", nullable=true, name="content_html")
-     */
-    private ?string $contentHtml = null;
-
-    /**
-     * @ORM\Column(type="text", nullable=true, name="content_txt")
-     */
-    private ?string $contentTxt = null;
-
-    /**
      * @ORM\Column(type="string", nullable=true, name="attachments")
      */
     private ?string $attachments = null;
@@ -68,6 +61,15 @@ class Mail
     public function __toString()
     {
         return $this->getName();
+    }
+
+    public function __call($method, $arguments)
+    {
+        if ($method == '_action') {
+            return null;
+        }
+
+        return PropertyAccess::createPropertyAccessor()->getValue($this->translate(), $method);
     }
 
     public function getId(): ?int
@@ -132,42 +134,6 @@ class Mail
         return $this;
     }
 
-    public function getTitle(): ?string
-    {
-        return $this->title;
-    }
-
-    public function setTitle(?string $title): self
-    {
-        $this->title = $title;
-
-        return $this;
-    }
-
-    public function getContentHtml(): ?string
-    {
-        return $this->contentHtml;
-    }
-
-    public function setContentHtml(?string $contentHtml): self
-    {
-        $this->contentHtml = $contentHtml;
-
-        return $this;
-    }
-
-    public function getContentTxt(): ?string
-    {
-        return $this->contentTxt;
-    }
-
-    public function setContentTxt(?string $contentTxt): self
-    {
-        $this->contentTxt = $contentTxt;
-
-        return $this;
-    }
-
     public function getAttachments(): ?string
     {
         return $this->attachments;
@@ -196,5 +162,50 @@ class Mail
     {
         $this->online = $online;
         return $this;
+    }
+
+
+    // Getter and setter for split input in few tabs in admin form
+
+    public function getTranslationsTitle()
+    {
+        return $this->getTranslations();
+    }
+
+    public function getTranslationsContentHtml()
+    {
+        return $this->getTranslations();
+    }
+
+    public function getTranslationsContentText()
+    {
+        return $this->getTranslations();
+    }
+
+    public function setTranslationsTitle(iterable $translations): void
+    {
+        $this->ensureIsIterableOrCollection($translations);
+
+        foreach ($translations as $translation) {
+            $this->addTranslation($translation);
+        }
+    }
+
+    public function setTranslationsContentHtml(iterable $translations): void
+    {
+        $this->ensureIsIterableOrCollection($translations);
+
+        foreach ($translations as $translation) {
+            $this->addTranslation($translation);
+        }
+    }
+
+    public function setTranslationsContentText(iterable $translations): void
+    {
+        $this->ensureIsIterableOrCollection($translations);
+
+        foreach ($translations as $translation) {
+            $this->addTranslation($translation);
+        }
     }
 }

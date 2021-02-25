@@ -35,19 +35,35 @@ return [
 ];
 ```
 
-Create the file `config/packages/norzechowicz_ace_editor.yaml`
-
-``` yaml
-norzechowicz_ace_editor:
-  base_path: "http://rawgithub.com/ajaxorg/ace-builds/master"
-```
-
 Register routes
 
 ```yaml 
 # config/routes/wd_mailer.yaml
 wd_mailer:
   resource: "@WDMailerBundle/Resources/config/routes.yaml"
+```
+
+configure your locales:
+```yaml
+# config/packages/wd_mailer.yaml
+wd_mailer:
+  locales: ['fr', 'en']
+  default_locale: 'en'
+```
+
+config dependency bundle
+```yaml
+# config/packages/a2lix.yaml
+a2lix_translation_form:
+  locale_provider: default
+  locales: '%wd_mailer.locales%'
+  default_locale: '%wd_mailer.default_locale%'
+  templating: "@A2lixTranslationForm/bootstrap_3_layout.html.twig"
+```
+```yaml
+# config/packages/norzechowicz_ace_editor.yaml
+norzechowicz_ace_editor:
+  base_path: "http://rawgithub.com/ajaxorg/ace-builds/master"
 ```
 
 ## Mail

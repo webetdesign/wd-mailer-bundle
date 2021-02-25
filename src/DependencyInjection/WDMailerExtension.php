@@ -25,7 +25,10 @@ class WDMailerExtension extends Extension
         $config        = $processor->processConfiguration($configuration, $configs);
 
         $mailerEvents = $config['events'];
-        $container->setParameter('mailer.events', $mailerEvents);
+        $container->setParameter('wd_mailer.events', $mailerEvents);
+
+        $container->setParameter('wd_mailer.locales', $config['locales']);
+        $container->setParameter('wd_mailer.default_locale', $config['default_locale']);
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yaml');
