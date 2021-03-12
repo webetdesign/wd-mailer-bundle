@@ -13,13 +13,19 @@ class MailTitleTranslationType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $constraints = [];
+
+        if ($options['required']){
+            $constraints = [
+                new NotBlank(),
+            ];
+        }
+
         $builder
             ->add('title', TextType::class, [
                     'label'       => 'Objet',
-                    'required'    => true,
-                    'constraints' => [
-                        new NotBlank(),
-                    ]
+                    'required'    => $options['required'],
+                    'constraints' => $constraints
                 ]
             );
     }

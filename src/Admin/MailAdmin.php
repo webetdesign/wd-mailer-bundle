@@ -149,10 +149,11 @@ final class MailAdmin extends AbstractAdmin
         $formMapper
             //            ->add('title', null, ['label' => 'Objet'])
             ->add('translationsTitle', TranslationsFormsType::class, [
-                'label'          => false,
-                'locales'        => $locales,
-                'default_locale' => [$locale],
-                'form_type'      => MailTitleTranslationType::class
+                'label'            => false,
+                'locales'          => $locales,
+                'default_locale'   => [$locale],
+                'required_locales' => [$locale],
+                'form_type'        => MailTitleTranslationType::class
 
             ])
             ->end()
@@ -162,7 +163,6 @@ final class MailAdmin extends AbstractAdmin
             ->tab('HTML')
             ->with('Contenu HTML',
                 ['class' => 'col-md-8', 'box_class' => 'box box-primary box-no-header'])
-
             ->add('translationsContentHtml', TranslationsFormsType::class, [
                 'label'          => false,
                 'locales'        => $locales,
@@ -183,7 +183,6 @@ final class MailAdmin extends AbstractAdmin
         $formMapper
             ->tab('Texte')
             ->with('', ['class' => 'col-md-8', 'box_class' => 'box box-primary box-no-header'])
-
             ->add('translationsContentText', TranslationsFormsType::class, [
                 'label'          => false,
                 'locales'        => $locales,
