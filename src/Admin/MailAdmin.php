@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace WebEtDesign\MailerBundle\Admin;
 
 use A2lix\TranslationFormBundle\Form\Type\TranslationsFormsType;
-use A2lix\TranslationFormBundle\Form\Type\TranslationsType;
-use Norzechowicz\AceEditorBundle\Form\Extension\AceEditor\Type\AceEditorType;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
@@ -16,8 +14,6 @@ use Sonata\AdminBundle\Show\ShowMapper;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Validator\Constraints\NotBlank;
 use WebEtDesign\MailerBundle\Entity\Mail;
 use WebEtDesign\MailerBundle\Entity\MailTranslation;
 use WebEtDesign\MailerBundle\Form\Admin\MailContentHtmlTranslationType;
@@ -41,11 +37,11 @@ final class MailAdmin extends AbstractAdmin
         $class,
         $baseControllerName = null,
         ParameterBagInterface $parameterBag
-    ) {
+    )
+    {
         parent::__construct($code, $class, $baseControllerName);
         $this->parameterBag = $parameterBag;
     }
-
 
     private $mailEvents;
 
@@ -78,6 +74,7 @@ final class MailAdmin extends AbstractAdmin
             ->add('id')
             ->add('name')
             ->add('event')
+            ->add('locale')
             ->add('to')
             ->add('from');
     }
@@ -88,6 +85,7 @@ final class MailAdmin extends AbstractAdmin
             ->add('id')
             ->add('name')
             ->add('event')
+            ->add('locale')
             ->add('to')
             ->add('from')
             ->add('_action', null, [
@@ -108,7 +106,7 @@ final class MailAdmin extends AbstractAdmin
         $locale  = $this->parameterBag->get('wd_mailer.default_locale');
 
         $this->setFormTheme(array_merge($this->getFormTheme(), [
-            '@WDMailer/admin/form/wd_mailer_tpl_params.html.twig'
+            '@WDMailer/admin/form/wd_mailer_tpl_params.html.twig',
         ]));
 
         /** @var Mail $subject */
@@ -123,7 +121,7 @@ final class MailAdmin extends AbstractAdmin
             ->with('#', ['class' => 'col-md-6', 'box_class' => 'box box-primary box-no-header'])
             ->add('name')
             ->add('event', ChoiceType::class, [
-                'choices' => $this->getMailEventsChoices()
+                'choices' => $this->getMailEventsChoices(),
             ])
             ->add('online', CheckboxType::class, [
                 'help'     => 'Permets d’enregistrer les mails pour le visualiser en ligne. <br>' .
@@ -139,6 +137,11 @@ final class MailAdmin extends AbstractAdmin
                 'label' => 'Destinataire(s)',
                 'help'  => 'Un ou plusieurs emails séparés par des virgules ou des retours ligne.<br>' .
                     'Les variables sont également acceptées sous cette syntaxe : __email__ ou __user.email__.<br>',
+            ])
+            ->add('locale', null, [
+                'label' => 'Localisation',
+                'help'  => 'La localisation utilisé pour l\'envoi de l\'email<br>' .
+                    'Les variables sont également acceptées sous cette syntaxe : __locale__ ou __user.locale__.<br>',
             ]);
 
         $fieldDescription = $this
@@ -149,11 +152,10 @@ final class MailAdmin extends AbstractAdmin
         $formMapper
             //            ->add('title', null, ['label' => 'Objet'])
             ->add('translationsTitle', TranslationsFormsType::class, [
-                'label'            => false,
-                'locales'          => $locales,
-                'default_locale'   => [$locale],
-                'required_locales' => [$locale],
-                'form_type'        => MailTitleTranslationType::class
+                'label'          => false,
+                'locales'        => $locales,
+                'default_locale' => [$locale],
+                'form_type'      => MailTitleTranslationType::class,
 
             ])
             ->end()
@@ -167,7 +169,7 @@ final class MailAdmin extends AbstractAdmin
                 'label'          => false,
                 'locales'        => $locales,
                 'default_locale' => [$locale],
-                'form_type'      => MailContentHtmlTranslationType::class
+                'form_type'      => MailContentHtmlTranslationType::class,
             ])
             ->end()
             ->with('Paramètres',
@@ -187,7 +189,7 @@ final class MailAdmin extends AbstractAdmin
                 'label'          => false,
                 'locales'        => $locales,
                 'default_locale' => [$locale],
-                'form_type'      => MailContentTextTranslationType::class
+                'form_type'      => MailContentTextTranslationType::class,
             ])
             ->end()
             ->with('Paramètres',
@@ -208,6 +210,7 @@ final class MailAdmin extends AbstractAdmin
             ->add('id')
             ->add('name')
             ->add('event')
+            ->add('locale')
             ->add('to')
             ->add('from')
             ->add('title')
@@ -245,6 +248,7 @@ final class MailAdmin extends AbstractAdmin
     public function setMailEvents($mailEvents)
     {
         $this->mailEvents = $mailEvents;
+
         return $this;
     }
 }

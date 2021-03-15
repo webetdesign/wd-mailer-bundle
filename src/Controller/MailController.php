@@ -1,8 +1,6 @@
 <?php
 
-
 namespace WebEtDesign\MailerBundle\Controller;
-
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

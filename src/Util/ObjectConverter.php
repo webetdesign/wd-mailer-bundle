@@ -56,4 +56,46 @@ class ObjectConverter
         return $methods;
     }
 
+    public static function getValue($field, $values)
+    {
+        if ($field === null) {
+            return null;
+        }
+
+        if (is_object($values)) {
+            $values = self::convertToArray($values);
+        }
+
+        $isArray = is_array($field);
+        $field   = !$isArray ? [$field] : $field;
+        foreach ($field as $k => $item) {
+            if (!preg_match('/^__(.*)__$/', $item, $matches)) {
+                continue;
+            }
+
+            unset($field[$k]);
+
+            $split = explode('.', $matches[1]);
+            $value = $values[array_shift($split)] ?? [];
+
+            foreach ($split as $i) {
+                $method = 'get' . ucfirst($i);
+                if (!method_exists($value, $method)) {
+                    $value = null;
+                    break;
+                }
+                $value = $value->$method();
+            }
+
+            if ($value) {
+                if (is_array($value)) {
+                    $field = [...$field, ...$value];
+                } else {
+                    $field[] = $value;
+                }
+            }
+        }
+
+        return $isArray ? $field : array_pop($field);
+    }
 }

@@ -34,6 +34,11 @@ class Mail implements TranslatableInterface
     private string $name = '';
 
     /**
+     * @ORM\Column(type="string", nullable=true, name="locale")
+     */
+    private ?string $locale = null;
+
+    /**
      * @ORM\Column(type="string", nullable=false, name="event")
      */
     private string $event = '';
@@ -110,6 +115,18 @@ class Mail implements TranslatableInterface
         return $this;
     }
 
+    public function getLocale(): ?string
+    {
+        return $this->locale;
+    }
+
+    public function setLocale(?string $locale): self
+    {
+        $this->locale = $locale;
+
+        return $this;
+    }
+
     public function getTo(): string
     {
         return $this->to;
@@ -161,9 +178,9 @@ class Mail implements TranslatableInterface
     public function setOnline(bool $online): Mail
     {
         $this->online = $online;
+
         return $this;
     }
-
 
     // Getter and setter for split input in few tabs in admin form
 

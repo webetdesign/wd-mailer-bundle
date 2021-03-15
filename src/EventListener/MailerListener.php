@@ -2,6 +2,7 @@
 
 namespace WebEtDesign\MailerBundle\EventListener;
 
+use Exception;
 use Psr\Log\LoggerInterface;
 use ReflectionClassConstant;
 use ReflectionException;
@@ -11,7 +12,6 @@ use WebEtDesign\MailerBundle\Model\MailManagerInterface;
 use WebEtDesign\MailerBundle\Transport\MailTransportInterface;
 use WebEtDesign\MailerBundle\Transport\TransportChain;
 use WebEtDesign\MailerBundle\Util\ObjectConverter;
-use WebEtDesign\MailerBundle\Entity\Mail;
 
 class MailerListener
 {
@@ -25,7 +25,7 @@ class MailerListener
     {
         $this->manager    = $manager;
         $this->transports = $transports;
-        $this->logger = $logger;
+        $this->logger     = $logger;
     }
 
     public function __invoke(Event $event)
@@ -44,61 +44,35 @@ class MailerListener
         }
 
         $values = ObjectConverter::convertToArray($event);
-        $locale = method_exists(get_class($event), 'getLocale') ? $event->getLocale() : null;
+        $locale = method_exists($event, 'getLocale') ? $event->getLocale() : null;
         foreach ($mails as $mail) {
-            $type      = 'twig'; // @TODO replace by mail type transport
-            $transport = $this->transports->get($type);
-            if (!$transport instanceof MailTransportInterface) {
-                throw new MailTransportException('Mail transport not found');
+            try {
+                $res = $this->sendMail($mail, $values, $locale);
+                $this->logger->info("Event " . $name . ' catch by mail listener, res = ' . $res);
+            } catch (Exception $exception) {
+                $this->logger->critical("Event " . $name . ' catch by mail listener, error = ' . $exception->getMessage());
             }
-
-            $res = $transport->send($mail, $locale, $values, $this->getRecipients($mail, $values));
-            $this->logger->info("Event " . $name . ' catch by mail listener, res = ' . $res);
         }
     }
 
-    /**
-     * @param Mail $mail
-     * @param $values
-     * @return array
-     * @throws MailTransportException
-     */
-    private function getRecipients(Mail $mail, $values)
+    private function sendMail($mail, $values, $locale)
     {
+        $type      = 'twig'; // @TODO replace by mail type transport
+        $transport = $this->transports->get($type);
+        if (!$transport instanceof MailTransportInterface) {
+            throw new MailTransportException('Mail transport not found');
+        }
+
         $to = $mail->getToAsArray();
         if (!$to) {
             throw new MailTransportException('No destination found');
         }
-        $to = !is_array($to) ? [$to] : $to;
-        foreach ($to as $k => $item) {
-            if (!preg_match('/^__(.*)__$/', $item, $matches)) {
-                continue;
-            }
 
-            unset($to[$k]);
-
-            $split = explode('.', $matches[1]);
-            $dest  = $values[array_shift($split)] ?? [];
-
-
-            foreach ($split as $item) {
-                $method = 'get' . ucfirst($item);
-                if (!method_exists($dest, $method)) {
-                    $dest = null;
-                    break;
-                }
-                $dest = $dest->$method();
-            }
-
-            if ($dest) {
-                if (is_array($dest)) {
-                    $to = [...$to, ...$dest];
-                } else {
-                    $to[] = $dest;
-                }
-            }
+        $mailLocale = $mail->getLocale();
+        if ($mailLocale) {
+            $locale = ObjectConverter::getValue($mailLocale, $values);
         }
 
-        return $to;
+        return $transport->send($mail, $locale, $values, ObjectConverter::getValue($to, $values));
     }
 }

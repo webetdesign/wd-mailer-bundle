@@ -7,6 +7,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
+use WebEtDesign\MailerBundle\EventListener\MailerListener;
 
 /**
  * This is the class that loads and manages your bundle configuration.
@@ -38,8 +39,7 @@ class WDMailerExtension extends Extension
             $loader->load('admin.yaml');
         }
 
-        $service = $container->getDefinition('WebEtDesign\MailerBundle\EventListener\MailerListener');
-
+        $service = $container->getDefinition(MailerListener::class);
         foreach ($config['events'] as $key => $event) {
             $service->addTag('kernel.event_listener', ['event' => $key, 'priority' => $event['priority']]);
         }
