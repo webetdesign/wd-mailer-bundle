@@ -65,6 +65,8 @@ class Twig implements MailTransportInterface
             $values['ONLINE_LINK'] = $online_link;
         }
 
+        $values['locale'] = $locale;
+
         $tpl     = $this->twig->createTemplate($mail->getContentHtml());
         $content = $tpl->render($values ?? []);
 

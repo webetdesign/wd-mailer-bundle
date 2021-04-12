@@ -44,7 +44,9 @@ class MailerListener
         }
 
         $values = ObjectConverter::convertToArray($event);
+
         $locale = method_exists(get_class($event), 'getLocale') ? $event->getLocale() : null;
+
         foreach ($mails as $mail) {
             $type      = 'twig'; // @TODO replace by mail type transport
             $transport = $this->transports->get($type);
