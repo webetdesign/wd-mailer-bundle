@@ -58,9 +58,9 @@ class MailTranslation implements TranslationInterface
      * @param string|null $title
      * @return MailTranslation
      */
-    public function setTitle(?string $title): MailTranslation
+    public function setTitle(?string $title = null): MailTranslation
     {
-        $this->title = $title;
+        $this->title = $title ? $title : 'trans_'.$this->getTranslatable()->getName();
         return $this;
     }
 
