@@ -86,6 +86,15 @@ class Mail implements TranslatableInterface
         return array_values(array_filter($emails, static fn($value) => !is_null($value) && $value !== ''));
     }
 
+    public function getAttachementsAsArray(): array
+    {
+        $attachements = preg_replace('/[\s\r\n]/', ',', $this->getAttachments());
+
+        $attachements = explode(',', $attachements);
+
+        return array_values(array_filter($attachements, static fn($value) => !is_null($value) && $value !== ''));
+    }
+
     public function getName(): string
     {
         return $this->name;

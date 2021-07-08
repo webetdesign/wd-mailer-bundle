@@ -139,7 +139,14 @@ final class MailAdmin extends AbstractAdmin
                 'label' => 'Destinataire(s)',
                 'help'  => 'Un ou plusieurs emails séparés par des virgules ou des retours ligne.<br>' .
                     'Les variables sont également acceptées sous cette syntaxe : __email__ ou __user.email__.<br>',
-            ]);
+            ])
+            ->add('attachments', null, [
+                'required' => false,
+                'label' => 'Fichiers joints',
+                'help'  =>'variables de type File acceptées sous cette syntaxe : __fichier__ ou __objet.fichier__.',
+            ])
+        ;
+
 
         $fieldDescription = $this
             ->getModelManager()
@@ -198,7 +205,7 @@ final class MailAdmin extends AbstractAdmin
                 'params' => $eventParams ?? [],
             ])
             ->end()
-            ->end()//            ->add('attachments')
+            ->end()//
         ;
     }
 
