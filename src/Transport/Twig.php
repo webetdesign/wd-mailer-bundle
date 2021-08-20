@@ -25,11 +25,12 @@ class Twig implements MailTransportInterface
     /**
      * @var RouterInterface
      */
-    private $router;
+    private RouterInterface $router;
     /**
      * @var EntityManagerInterface
      */
-    private $em;
+    private EntityManagerInterface $em;
+
     /**
      * @var ParameterBagInterface
      */
