@@ -80,7 +80,7 @@ final class MailAdmin extends AbstractAdmin
             ->add('event')
             ->add('to')
             ->add('from')
-            ->add('_action', null, [
+            ->add(ListMapper::NAME_ACTIONS, null, [
                 'actions' => [
                     //                    'show'   => [],
                     'edit'   => [],
