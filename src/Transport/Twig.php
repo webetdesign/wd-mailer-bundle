@@ -189,4 +189,21 @@ class Twig implements MailTransportInterface
 
         return $attachements;
     }
+
+    /**
+     * @return Swift_Mailer
+     */
+    public function getMailer(): Swift_Mailer
+    {
+        return $this->mailer;
+    }
+
+    /**
+     * @param Swift_Mailer $mailer
+     */
+    public function setMailer(Swift_Mailer $mailer): void
+    {
+        $this->mailer = $mailer;
+    }
+
 }
