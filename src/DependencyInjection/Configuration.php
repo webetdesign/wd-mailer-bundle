@@ -39,6 +39,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('class')->end()
                             ->scalarNode('label')->end()
                             ->scalarNode('priority')->defaultValue(0)->end()
+                            ->scalarNode('constant')->defaultValue('NAME')->end()
                         ->end()
                     ->end()
                 ->end()
