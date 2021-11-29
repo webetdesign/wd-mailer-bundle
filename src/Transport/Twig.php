@@ -139,7 +139,7 @@ class Twig implements MailTransportInterface
 
         $message = (new Swift_Message('Erreur lors de la soumission du mail'))
             ->setFrom($mail->getFrom())
-            ->setTo('equipe@webetdesign.com')
+            ->setTo($_ENV['REPORT_ADDRESS'] ?? 'equipe@webetdesign.com')
             ->setBody(
                 $content,
                 'text/html'
