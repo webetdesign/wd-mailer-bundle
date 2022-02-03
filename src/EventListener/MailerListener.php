@@ -21,6 +21,8 @@ class MailerListener
 
     private LoggerInterface $logger;
 
+    private array $constants = [];
+
     public function __construct(MailManagerInterface $manager, TransportChain $transports, LoggerInterface $logger)
     {
         $this->manager    = $manager;
@@ -28,11 +30,11 @@ class MailerListener
         $this->logger = $logger;
     }
 
-    public function __invoke(Event $event)
+    public function __invoke(Event $event, $key)
     {
         $className = get_class($event);
         try {
-            $constant = new ReflectionClassConstant($className, 'NAME');
+            $constant = new ReflectionClassConstant($className, $this->getConstant($key));
             $name     = $constant->getValue();
         } catch (ReflectionException $e) {
             $name = $className;
@@ -101,5 +103,25 @@ class MailerListener
         }
 
         return $to;
+    }
+
+    /**
+     * @param $key
+     * @return string
+     */
+    public function getConstant($key): string
+    {
+        return $this->constants[$key];
+    }
+
+    /**
+     * @param string $key
+     * @param string $constant
+     * @return MailerListener
+     */
+    public function setConstant(string $key, string $constant): MailerListener
+    {
+        $this->constants[$key] = $constant;
+        return $this;
     }
 }

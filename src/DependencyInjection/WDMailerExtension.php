@@ -42,6 +42,7 @@ class WDMailerExtension extends Extension
 
         foreach ($config['events'] as $key => $event) {
             $service->addTag('kernel.event_listener', ['event' => $key, 'priority' => $event['priority']]);
+            $service->addMethodCall('setConstant', [$key, $event['constant']]);
         }
 
         $loader->load('doctrine.yaml');
