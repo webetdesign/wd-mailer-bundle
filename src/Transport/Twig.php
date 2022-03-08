@@ -127,7 +127,11 @@ class Twig implements MailTransportInterface
         $mailError = new MailError();
         $mailError
             ->setMail($mail)
-            ->setObject($this->serializer->serialize($values, 'json'));
+            ->setObject($this->serializer->serialize($values, 'json', [
+                'circular_reference_handler' => function ($object) {
+                    return $object->getId();
+                }
+            ]));
         $this->em->persist($mailError);
         $this->em->flush();
 
