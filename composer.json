@@ -11,7 +11,7 @@
   "require": {
     "php": "^7.4|^8.0",
     "a2lix/translation-form-bundle": "^3.0",
-    "doctrine/doctrine-bundle": "^1.12 || ^2.6",
+    "doctrine/doctrine-bundle": "^1.12 || ^2.0",
     "doctrine/orm": "^2.6.4 || ^3.0",
     "knplabs/doctrine-behaviors": "^2.0",
     "norberttech/aceeditor-bundle": "^5",
