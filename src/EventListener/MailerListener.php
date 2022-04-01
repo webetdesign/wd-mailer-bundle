@@ -6,6 +6,7 @@ use Psr\Log\LoggerInterface;
 use ReflectionClassConstant;
 use ReflectionException;
 use Symfony\Contracts\EventDispatcher\Event;
+use WebEtDesign\MailerBundle\Event\MailEventInterface;
 use WebEtDesign\MailerBundle\Exception\MailTransportException;
 use WebEtDesign\MailerBundle\Model\MailManagerInterface;
 use WebEtDesign\MailerBundle\Transport\MailTransportInterface;
@@ -30,11 +31,19 @@ class MailerListener
         $this->logger = $logger;
     }
 
+    /**
+     * @throws MailTransportException
+     */
     public function __invoke(Event $event, $key)
     {
         $className = get_class($event);
+
+        if (!array_key_exists(MailEventInterface::class, class_implements($className))){
+            return;
+        }
+
         try {
-            $constant = new ReflectionClassConstant($className, $this->getConstant($key));
+            $constant = new ReflectionClassConstant($className, $key);
             $name     = $constant->getValue();
         } catch (ReflectionException $e) {
             $name = $className;
@@ -47,7 +56,7 @@ class MailerListener
 
         $values = ObjectConverter::convertToArray($event);
 
-        $locale = method_exists(get_class($event), 'getLocale') ? $event->getLocale() : null;
+        $locale = method_exists($className, 'getLocale') ? $event->getLocale() : null;
 
         foreach ($mails as $mail) {
             $type      = 'twig'; // @TODO replace by mail type transport
@@ -66,7 +75,7 @@ class MailerListener
      * @return array
      * @throws MailTransportException
      */
-    private function getRecipients(Mail $mail, $values)
+    private function getRecipients(Mail $mail, $values): array
     {
         $to = $mail->getToAsArray();
         if (!$to) {
@@ -105,23 +114,4 @@ class MailerListener
         return $to;
     }
 
-    /**
-     * @param $key
-     * @return string
-     */
-    public function getConstant($key): string
-    {
-        return $this->constants[$key];
-    }
-
-    /**
-     * @param string $key
-     * @param string $constant
-     * @return MailerListener
-     */
-    public function setConstant(string $key, string $constant): MailerListener
-    {
-        $this->constants[$key] = $constant;
-        return $this;
-    }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WebEtDesign\MailerBundle\Admin;
 
 use A2lix\TranslationFormBundle\Form\Type\TranslationsFormsType;
+use JetBrains\PhpStorm\Pure;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
@@ -19,6 +20,7 @@ use WebEtDesign\MailerBundle\Form\Admin\MailContentHtmlTranslationType;
 use WebEtDesign\MailerBundle\Form\Admin\MailContentTextTranslationType;
 use WebEtDesign\MailerBundle\Form\Admin\MailTitleTranslationType;
 use WebEtDesign\MailerBundle\Form\TplParametersType;
+use WebEtDesign\MailerBundle\Services\MailEventManager;
 use WebEtDesign\MailerBundle\Util\ObjectConverter;
 
 final class MailAdmin extends AbstractAdmin
@@ -32,14 +34,16 @@ final class MailAdmin extends AbstractAdmin
         $code,
         $class,
         $baseControllerName,
-        ParameterBagInterface $parameterBag
+        ParameterBagInterface $parameterBag,
+        MailEventManager $mailEventManager
     ) {
         parent::__construct($code, $class, $baseControllerName);
         $this->parameterBag = $parameterBag;
+        $this->mailEvents = $mailEventManager->getEvents();
     }
 
 
-    private $mailEvents;
+    private array $mailEvents;
 
     protected function configureRoutes(RouteCollectionInterface $collection): void
     {
@@ -116,8 +120,8 @@ final class MailAdmin extends AbstractAdmin
                 'choices' => $this->getMailEventsChoices()
             ])
             ->add('online', CheckboxType::class, [
-                'help'     => 'Permets d’enregistrer les mails pour le visualiser en ligne. <br>' .
-                    'Ajouter dans le template HTML un lien avec comme href : <code>{{ ONLINE_LINK }}</code>',
+                'help'     => 'Permets d’enregistrer les mails pour le visualiser en ligne. ' .
+                    'Ajouter dans le template HTML un lien avec comme href : {{ ONLINE_LINK }}',
                 'required' => false,
             ])
             ->end();
@@ -127,13 +131,13 @@ final class MailAdmin extends AbstractAdmin
             ->add('from', null, ['label' => 'De'])
             ->add('to', null, [
                 'label' => 'Destinataire(s)',
-                'help'  => 'Un ou plusieurs emails séparés par des virgules ou des retours ligne.<br>' .
-                    'Les variables sont également acceptées sous cette syntaxe : __email__ ou __user.email__.<br>',
+                'help'  => 'Un ou plusieurs emails séparés par des virgules ou des retours ligne. ' .
+                    'Les variables sont également acceptées sous cette syntaxe : __email__',
             ])
             ->add('attachments', null, [
                 'required' => false,
                 'label' => 'Fichiers joints',
-                'help'  =>'variables de type File acceptées sous cette syntaxe : __fichier__ ou __objet.fichier__.',
+                'help'  =>'Les variables de type fichier acceptées sous cette syntaxe : __fichier__',
             ])
         ;
 
@@ -151,47 +155,49 @@ final class MailAdmin extends AbstractAdmin
             ->end()
             ->end();
 
-        $formMapper
-            ->tab('HTML')
-            ->with('Contenu HTML',
-                ['class' => 'col-md-8', 'box_class' => 'box box-primary box-no-header'])
-            ->add('translationsContentHtml', TranslationsFormsType::class, [
-                'label'          => false,
-                'locales'        => $locales,
-                'default_locale' => [$locale],
-                'form_type'      => MailContentHtmlTranslationType::class
-            ])
-            ->end()
-            ->with('Paramètres',
-                ['class' => 'col-md-4', 'box_class' => 'box box-primary box-no-header'])
-            ->add('paramsHtml', TplParametersType::class, [
-                'mapped' => false,
-                'label'  => false,
-                'params' => $eventParams ?? [],
-            ])
-            ->end()
-            ->end();
+        if ($subject->getId()){
+            $formMapper
+                ->tab('HTML')
+                ->with('Contenu HTML',
+                    ['class' => 'col-md-8', 'box_class' => 'box box-primary box-no-header'])
+                ->add('translationsContentHtml', TranslationsFormsType::class, [
+                    'label'          => false,
+                    'locales'        => $locales,
+                    'default_locale' => [$locale],
+                    'form_type'      => MailContentHtmlTranslationType::class
+                ])
+                ->end()
+                ->with('Paramètres',
+                    ['class' => 'col-md-4', 'box_class' => 'box box-primary box-no-header'])
+                ->add('paramsHtml', TplParametersType::class, [
+                    'mapped' => false,
+                    'label'  => false,
+                    'params' => $eventParams ?? [],
+                ])
+                ->end()
+                ->end();
 
-        $formMapper
-            ->tab('Texte')
-            ->with('', ['class' => 'col-md-8', 'box_class' => 'box box-primary box-no-header'])
-            ->add('translationsContentText', TranslationsFormsType::class, [
-                'label'          => false,
-                'locales'        => $locales,
-                'default_locale' => [$locale],
-                'form_type'      => MailContentTextTranslationType::class
-            ])
-            ->end()
-            ->with('Paramètres',
-                ['class' => 'col-md-4', 'box_class' => 'box box-primary box-no-header'])
-            ->add('paramsTxt', TplParametersType::class, [
-                'mapped' => false,
-                'label'  => false,
-                'params' => $eventParams ?? [],
-            ])
-            ->end()
-            ->end()//
-        ;
+            $formMapper
+                ->tab('Texte')
+                ->with('', ['class' => 'col-md-8', 'box_class' => 'box box-primary box-no-header'])
+                ->add('translationsContentText', TranslationsFormsType::class, [
+                    'label'          => false,
+                    'locales'        => $locales,
+                    'default_locale' => [$locale],
+                    'form_type'      => MailContentTextTranslationType::class
+                ])
+                ->end()
+                ->with('Paramètres',
+                    ['class' => 'col-md-4', 'box_class' => 'box box-primary box-no-header'])
+                ->add('paramsTxt', TplParametersType::class, [
+                    'mapped' => false,
+                    'label'  => false,
+                    'params' => $eventParams ?? [],
+                ])
+                ->end()
+                ->end()//
+            ;
+        }
     }
 
     protected function configureShowFields(ShowMapper $showMapper): void
@@ -208,18 +214,13 @@ final class MailAdmin extends AbstractAdmin
             ->add('attachments');
     }
 
-    /**
-     * @return mixed
-     */
-    public function getMailEvents()
+    public function getMailEvents(): array
     {
         return $this->mailEvents;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getMailEventsChoices()
+
+    #[Pure] public function getMailEventsChoices(): array
     {
         $events  = $this->getMailEvents();
         $choices = [];
@@ -228,15 +229,5 @@ final class MailAdmin extends AbstractAdmin
         }
 
         return array_flip($choices);
-    }
-
-    /**
-     * @param mixed $mailEvents
-     * @return MailAdmin
-     */
-    public function setMailEvents($mailEvents)
-    {
-        $this->mailEvents = $mailEvents;
-        return $this;
     }
 }
