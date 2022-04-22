@@ -5,21 +5,16 @@ declare(strict_types=1);
 namespace WebEtDesign\MailerBundle\Admin;
 
 use A2lix\TranslationFormBundle\Form\Type\TranslationsFormsType;
-use A2lix\TranslationFormBundle\Form\Type\TranslationsType;
-use Norzechowicz\AceEditorBundle\Form\Extension\AceEditor\Type\AceEditorType;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
-use Sonata\AdminBundle\Route\RouteCollection;
+use Sonata\AdminBundle\Route\RouteCollectionInterface;
 use Sonata\AdminBundle\Show\ShowMapper;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Validator\Constraints\NotBlank;
 use WebEtDesign\MailerBundle\Entity\Mail;
-use WebEtDesign\MailerBundle\Entity\MailTranslation;
 use WebEtDesign\MailerBundle\Form\Admin\MailContentHtmlTranslationType;
 use WebEtDesign\MailerBundle\Form\Admin\MailContentTextTranslationType;
 use WebEtDesign\MailerBundle\Form\Admin\MailTitleTranslationType;
@@ -28,9 +23,6 @@ use WebEtDesign\MailerBundle\Util\ObjectConverter;
 
 final class MailAdmin extends AbstractAdmin
 {
-    /**
-     * @var ParameterBagInterface
-     */
     private ParameterBagInterface $parameterBag;
 
     /**
@@ -39,7 +31,7 @@ final class MailAdmin extends AbstractAdmin
     public function __construct(
         $code,
         $class,
-        $baseControllerName = null,
+        $baseControllerName,
         ParameterBagInterface $parameterBag
     ) {
         parent::__construct($code, $class, $baseControllerName);
@@ -49,7 +41,7 @@ final class MailAdmin extends AbstractAdmin
 
     private $mailEvents;
 
-    protected function configureRoutes(RouteCollection $collection): void
+    protected function configureRoutes(RouteCollectionInterface $collection): void
     {
         $collection->add('test', 'test/{id}');
     }
@@ -57,10 +49,8 @@ final class MailAdmin extends AbstractAdmin
     /**
      * @inheritDoc
      */
-    public function configureActionButtons($action, $object = null): array
+    public function configureActionButtons(array $list, string $action, ?object $object = null): array
     {
-        $list = parent::configureActionButtons($action, $object);
-
         if (in_array($action, ['show', 'edit'], true)
             && $this->hasRoute('test')
         ) {
@@ -90,7 +80,7 @@ final class MailAdmin extends AbstractAdmin
             ->add('event')
             ->add('to')
             ->add('from')
-            ->add('_action', null, [
+            ->add(ListMapper::NAME_ACTIONS, null, [
                 'actions' => [
                     //                    'show'   => [],
                     'edit'   => [],
@@ -147,11 +137,6 @@ final class MailAdmin extends AbstractAdmin
             ])
         ;
 
-
-        $fieldDescription = $this
-            ->getModelManager()
-            ->getNewFieldDescriptionInstance(MailTranslation::class, 'translations', [
-            ]);
 
         $formMapper
             //            ->add('title', null, ['label' => 'Objet'])
