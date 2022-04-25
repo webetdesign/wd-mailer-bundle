@@ -8,6 +8,12 @@
       "homepage": "https://www.webetdesign.com"
     }
   ],
+  "repositories": [
+    {
+      "type": "git",
+      "url": "git@github.com:webetdesign/aceeditor-bundle.git"
+    }
+  ],
   "require": {
     "php": "^7.4|^8.0",
     "a2lix/translation-form-bundle": "^3.0",
