@@ -3,10 +3,13 @@
 namespace WebEtDesign\MailerBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
+use WebEtDesign\CmsBundle\Attribute\AsCmsBlock;
+use WebEtDesign\MailerBundle\Attribute\MailEvent;
 
 /**
  * This is the class that loads and manages your bundle configuration.
@@ -24,9 +27,6 @@ class WDMailerExtension extends Extension
         $processor     = new Processor();
         $config        = $processor->processConfiguration($configuration, $configs);
 
-        $mailerEvents = $config['events'];
-        $container->setParameter('wd_mailer.events', $mailerEvents);
-
         $container->setParameter('wd_mailer.locales', $config['locales']);
         $container->setParameter('wd_mailer.default_locale', $config['default_locale']);
 
@@ -38,11 +38,15 @@ class WDMailerExtension extends Extension
             $loader->load('admin.yaml');
         }
 
-        $service = $container->getDefinition('WebEtDesign\MailerBundle\EventListener\MailerListener');
+        $mailerListener = $container->getDefinition('WebEtDesign\MailerBundle\EventListener\MailerListener');
 
-        foreach ($config['events'] as $key => $event) {
-            $service->addTag('kernel.event_listener', ['event' => $key, 'priority' => $event['priority']]);
-            $service->addMethodCall('setConstant', [$key, $event['constant']]);
+        if (method_exists($container, 'registerAttributeForAutoconfiguration')) {
+            $container->registerAttributeForAutoconfiguration(MailEvent::class,
+                static function (ChildDefinition $definition, MailEvent $attribute) use ($mailerListener) {
+                    $mailerListener->addTag('kernel.event_listener', ['event' => $attribute->name, 'priority' => $attribute->priority]);
+                    $definition->addTag('wd_mailer.event', ['event' => json_encode($attribute)]);
+                }
+            );
         }
 
         $loader->load('doctrine.yaml');

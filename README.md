@@ -89,10 +89,14 @@ Sample event
 namespace App\Event;
 
 use Symfony\Contracts\EventDispatcher\Event;
+use WebEtDesign\MailerBundle\Event\MailEventInterface;
+use WebEtDesign\MailerBundle\Attribute\MailEvent;
+use Symfony\Component\HttpFoundation\File\File;
 
-class UserCreateEvent extends Event
+#[MailEvent(name: self::USER_CREATED, label: 'Utlisateur créé')]
+class UserCreateEvent extends Event implements MailEventInterface
 {
-    public const NAME = 'user.created';
+    public const USER_CREATED = 'USER_CREATED';
 
     private $user;
 
@@ -106,36 +110,25 @@ class UserCreateEvent extends Event
         return $this->user;
     }
     
-    public function getEmail() {
+    public function getEmail(): string 
+    {
         return 'toto@webetdesign.com';
+    }
+    
+    public function getFile(): ?File
+    {
+        return null;
     }
 }
 ```
-The use of the constant "NAME" allows to use an alias instead of the FQCN. 
-
 Each getter will be used to determine the name of a variable in the template. In this example, there will be 2 variables, "user" and "email" that will be directly injected in the template.
-
-## Listener
-
-Register events in `config/package/wd_mailer.yaml`
-
-```yaml
-wd_mailer: 
-    events:
-      user.created:
-        label: On user creation
-        class: App\Event\UserCreateEvent
-```
 
 ## Dispatch event
 
-``` php 
-    $event = new UserCreateEvent($this->getUser());
-    $eventDispatcher->dispatch($event, UserCreateEvent::NAME);
+```php 
+$eventDispatcher->dispatch(new UserCreateEvent($this->getUser()), UserCreateEvent::USER_CREATED);
 ```
 
 ## Evolution 
 
 - Add multiple transport 
-- Automatically add an event with interface or annotation
-- Add attachment
