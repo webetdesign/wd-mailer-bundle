@@ -3,15 +3,20 @@
 namespace WebEtDesign\MailerBundle\Transport;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Swift_Mailer;
-use Swift_Message;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
+use Throwable;
 use Twig\Environment;
 use Twig\Error\Error;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 use WebEtDesign\MailerBundle\Entity\Mail;
 use WebEtDesign\MailerBundle\Entity\MailError;
 use WebEtDesign\MailerBundle\Entity\MailOnline;
@@ -20,26 +25,16 @@ use WebEtDesign\MailerBundle\Exception\MailTransportException;
 class Twig implements MailTransportInterface
 {
     private Environment  $twig;
-    private Swift_Mailer $mailer;
     private Serializer $serializer;
-    /**
-     * @var RouterInterface
-     */
     private RouterInterface $router;
-    /**
-     * @var EntityManagerInterface
-     */
     private EntityManagerInterface $em;
-
-    /**
-     * @var ParameterBagInterface
-     */
     private ParameterBagInterface $parameterBag;
+    private MailerInterface $mailer;
 
 
     public function __construct(
         Environment $twig,
-        Swift_Mailer $mailer,
+        MailerInterface $mailer,
         RouterInterface $router,
         EntityManagerInterface $em,
         ParameterBagInterface $parameterBag,
@@ -53,6 +48,11 @@ class Twig implements MailTransportInterface
         $this->serializer = $serializer;
     }
 
+    /**
+     * @throws SyntaxError
+     * @throws LoaderError
+     * @throws MailTransportException
+     */
     public function send(Mail $mail, $locale = null, $values = null, $to = null, $debug = false): ?int
     {
         if (!$values) {
@@ -81,7 +81,10 @@ class Twig implements MailTransportInterface
             $content = $tpl->render($values ?? []);
         } catch (Error $error) {
             if(!$debug) {
-                $this->alertAdministrators($mail, $values, $error->getRawMessage());
+                try {
+                    $this->alertAdministrators($mail, $values, $error->getRawMessage());
+                } catch (TransportExceptionInterface | LoaderError | RuntimeError | SyntaxError | Throwable $e) {
+                }
             }
             if($this->parameterBag->get("kernel.environment") === "dev") {
                 throw new MailTransportException($error->getRawMessage());
@@ -104,25 +107,38 @@ class Twig implements MailTransportInterface
             $this->em->flush();
         }
 
-        $message = (new Swift_Message($mail->getTitle()))
-            ->setFrom($mail->getFrom())
-            ->setTo($to)
-            ->setBody(
+        $message = (new Email())
+            ->subject($mail->getTitle())
+            ->from($mail->getFrom())
+            ->to($to)
+            ->html(
                 $content,
                 'text/html'
             );
 
         if (isset($contentTxt)) {
-            $message->addPart($contentTxt, 'text/plain');
+            $message->text($contentTxt, 'text/plain');
         }
 
-        foreach($this->getAttachements($mail, $values) as $attachment) {
-            $message->attach(\Swift_Attachment::fromPath($attachment->getRealPath()));
+        foreach($this->getAttachments($mail, $values) as $attachment) {
+            $message->attachFromPath($attachment->getRealPath());
         }
 
-        return $this->mailer->send($message);
+        try {
+            $this->mailer->send($message);
+            return 1;
+        } catch (TransportExceptionInterface $e) {
+            return 0;
+        }
     }
 
+    /**
+     * @throws Throwable
+     * @throws SyntaxError
+     * @throws TransportExceptionInterface
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
     public function alertAdministrators(Mail $mail, $values, $error) {
         $mailError = new MailError();
         $mailError
@@ -137,10 +153,11 @@ class Twig implements MailTransportInterface
         $tpl     = $this->twig->loadTemplate('@WDMailer/admin/mail/error.html.twig');
         $content = $tpl->render(['project' => $project, 'template' => $template, 'error' => $error, 'url' => $url, 'mailErrorId' => $mailError->getId()]);
 
-        $message = (new Swift_Message('Erreur lors de la soumission du mail'))
-            ->setFrom($mail->getFrom())
-            ->setTo($_ENV['REPORT_ADDRESS'] ?? 'equipe@webetdesign.com')
-            ->setBody(
+        $message = (new Email())
+            ->subject('Erreur lors de la soumission du mail')
+            ->from($mail->getFrom())
+            ->to($_ENV['REPORT_ADDRESS'] ?? 'equipe@webetdesign.com')
+            ->html(
                 $content,
                 'text/html'
             );
@@ -151,57 +168,50 @@ class Twig implements MailTransportInterface
     * @param Mail $mail
     * @param $values
     * @return array
-    * @throws MailTransportException
-    */
-    private function getAttachements(Mail $mail, $values)
+     */
+    private function getAttachments(Mail $mail, $values): array
     {
-        $attachements = $mail->getAttachementsAsArray();
+        $attachments = $mail->getAttachementsAsArray();
 
-        $attachements = !is_array($attachements) ? [$attachements] : $attachements;
-        foreach ($attachements as $k => $item) {
+        $attachments = !is_array($attachments) ? [$attachments] : $attachments;
+        foreach ($attachments as $k => $item) {
             if (!preg_match('/^__(.*)__$/', $item, $matches)) {
                 continue;
             }
 
-            unset($attachements[$k]);
+            unset($attachments[$k]);
 
             $split = explode('.', $matches[1]);
-            $attachement  = $values[array_shift($split)] ?? [];
+            $attachment  = $values[array_shift($split)] ?? [];
 
 
-            foreach ($split as $item) {
-                $method = 'get' . ucfirst($item);
-                if (!method_exists($attachement, $method)) {
-                    $attachement = null;
+            foreach ($split as $slip_item) {
+                $method = 'get' . ucfirst($slip_item);
+                if (!method_exists($attachment, $method)) {
+                    $attachment = null;
                     break;
                 }
-                $attachement = $attachement->$method();
+                $attachment = $attachment->$method();
             }
 
-            if ($attachement) {
-                if (is_array($attachement)) {
-                    $attachements = [...$attachements, ...$attachement];
+            if ($attachment) {
+                if (is_array($attachment)) {
+                    $attachments = [...$attachments, ...$attachment];
                 } else {
-                    $attachements[] = $attachement;
+                    $attachments[] = $attachment;
                 }
             }
         }
 
-        return $attachements;
+        return $attachments;
     }
 
-    /**
-     * @return Swift_Mailer
-     */
-    public function getMailer(): Swift_Mailer
+    public function getMailer(): MailerInterface
     {
         return $this->mailer;
     }
 
-    /**
-     * @param Swift_Mailer $mailer
-     */
-    public function setMailer(Swift_Mailer $mailer): void
+    public function setMailer(MailerInterface $mailer): void
     {
         $this->mailer = $mailer;
     }

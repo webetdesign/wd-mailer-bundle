@@ -23,7 +23,7 @@
     "webetdesign/aceeditor-bundle": "^5",
     "symfony/form": "^5.4",
     "symfony/dependency-injection": "^5.4",
-    "symfony/swiftmailer-bundle": "^3.4"
+    "symfony/mailer": "5.4.*"
   },
   "require-dev": {
     "sonata-project/admin-bundle": "^3.81",

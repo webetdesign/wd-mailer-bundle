@@ -7,7 +7,6 @@ namespace WebEtDesign\MailerBundle\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use WebEtDesign\MailerBundle\Entity\MailOnline;
 
@@ -20,12 +19,8 @@ class MailController extends AbstractController
      * @param MailOnline $mail
      * @return Response
      */
-    public function __invoke(MailOnline $mail)
+    public function __invoke(MailOnline $mail): Response
     {
-        if (!$mail) {
-            throw new NotFoundHttpException();
-        }
-
         return new Response($mail->getHtml());
     }
 }

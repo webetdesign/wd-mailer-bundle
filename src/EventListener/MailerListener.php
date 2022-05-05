@@ -32,6 +32,7 @@ class MailerListener
     }
 
     /**
+     * @throws ReflectionException
      * @throws MailTransportException
      */
     public function __invoke(Event $event, $key)
@@ -93,8 +94,8 @@ class MailerListener
             $dest  = $values[array_shift($split)] ?? [];
 
 
-            foreach ($split as $item) {
-                $method = 'get' . ucfirst($item);
+            foreach ($split as $split_item) {
+                $method = 'get' . ucfirst($split_item);
                 if (!method_exists($dest, $method)) {
                     $dest = null;
                     break;
