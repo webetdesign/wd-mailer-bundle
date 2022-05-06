@@ -5,6 +5,7 @@ namespace WebEtDesign\MailerBundle\Util;
 use ReflectionClass;
 use ReflectionFunction;
 use ReflectionMethod;
+use ReflectionUnionType;
 
 class ObjectConverter
 {
@@ -47,7 +48,16 @@ class ObjectConverter
 
             $ret = 'Undefined';
             if ($method->hasReturnType()) {
-                $ret = $method->getReturnType()->getName() . ($method->getReturnType()->allowsNull() ? '|null' : '');
+                $ret = '';
+                $returnType = $method->getReturnType();
+                if ($returnType instanceof ReflectionUnionType) {
+                    foreach ($returnType->getTypes() as $index => $type) {
+                        $ret .= ($index !== 0 ? ' | ' : '') . $type->getName();
+                    }
+                } else {
+                    $ret = $method->getReturnType()->getName() . ($method->getReturnType()->allowsNull() ? '|null' : '');
+                }
+
             }
 
             $methods[lcfirst(str_replace('get', '', $method->getName()))] = $ret;

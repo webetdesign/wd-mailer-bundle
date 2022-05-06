@@ -6,6 +6,10 @@ use Symfony\Component\HttpFoundation\File\File;
 interface MailEventInterface
 {
     public function getEmail(): string;
-    public function getFile(): ?File;
+
+    /**
+     * @return File[]|File|null
+     */
+    public function getFile(): null|array|File;
 
 }
