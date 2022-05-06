@@ -3,13 +3,16 @@
 namespace WebEtDesign\MailerBundle\Util;
 
 use ReflectionClass;
-use ReflectionFunction;
+use ReflectionException;
 use ReflectionMethod;
 use ReflectionUnionType;
 
 class ObjectConverter
 {
 
+    /**
+     * @throws ReflectionException
+     */
     public static function convertToArray($object): array
     {
         if (!$object) {
@@ -18,10 +21,10 @@ class ObjectConverter
 
         $values = [];
 
-        $classRefex = new ReflectionClass($object);
-        $methods    = $classRefex->getMethods(ReflectionMethod::IS_PUBLIC);
+        $classReflex = new ReflectionClass($object);
+        $methods    = $classReflex->getMethods(ReflectionMethod::IS_PUBLIC);
         foreach ($methods as $method) {
-            if (0 !== strpos($method->getName(), "get")) {
+            if (!str_starts_with($method->getName(), "get")) {
                 continue;
             }
             $name          = lcfirst(str_replace('get', '', $method->getName()));
@@ -31,7 +34,10 @@ class ObjectConverter
         return $values;
     }
 
-    public static function getAvailableMethods($object)
+    /**
+     * @throws ReflectionException
+     */
+    public static function getAvailableMethods($object): array
     {
         if (!$object) {
             return [];
@@ -42,7 +48,7 @@ class ObjectConverter
         $classReflex = new ReflectionClass($object);
 
         foreach ($classReflex->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-            if (0 !== strpos($method->getName(), "get")) {
+            if (!str_starts_with($method->getName(), "get")) {
                 continue;
             }
 

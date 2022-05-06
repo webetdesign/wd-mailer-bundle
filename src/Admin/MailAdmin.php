@@ -108,7 +108,7 @@ final class MailAdmin extends AbstractAdmin
         /** @var Mail $subject */
         $subject = $this->getSubject();
         if ($subject && $subject->getEvent()) {
-            $event       = $this->getMailEvents()[$subject->getEvent()]['class'];
+            $event       = $this->getMailEvents()[$subject->getEvent()]['class'] ?? null;
             $eventParams = ObjectConverter::getAvailableMethods($event);
         }
 
