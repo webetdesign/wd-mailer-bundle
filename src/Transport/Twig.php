@@ -110,11 +110,18 @@ class Twig implements MailTransportInterface
         $message = (new Email())
             ->subject($mail->getTitle())
             ->from($mail->getFrom())
-            ->to($to)
             ->html(
                 $content,
                 'text/html'
             );
+
+        if (is_array($to)) {
+            foreach ($to as $adress) {
+                $message->addTo($adress);
+            }
+        } else {
+            $message->addTo($to);
+        }
 
         if (isset($contentTxt)) {
             $message->text($contentTxt, 'text/plain');
