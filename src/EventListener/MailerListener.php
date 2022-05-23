@@ -2,6 +2,7 @@
 
 namespace WebEtDesign\MailerBundle\EventListener;
 
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use ReflectionClassConstant;
 use ReflectionException;
@@ -24,11 +25,11 @@ class MailerListener
 
     private LoggerInterface $logger;
 
-    private EventDispatcher $dispatcher;
+    private EventDispatcherInterface $dispatcher;
 
     private array $constants = [];
 
-    public function __construct(MailManagerInterface $manager, TransportChain $transports, EventDispatcher $dispatcher, LoggerInterface $logger)
+    public function __construct(MailManagerInterface $manager, TransportChain $transports, EventDispatcherInterface $dispatcher, LoggerInterface $logger)
     {
         $this->manager    = $manager;
         $this->transports = $transports;
