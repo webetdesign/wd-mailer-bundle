@@ -6,6 +6,8 @@ use Psr\Log\LoggerInterface;
 use ReflectionClassConstant;
 use ReflectionException;
 use Symfony\Contracts\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use WebEtDesign\MailerBundle\Event\EmailSentEvent;
 use WebEtDesign\MailerBundle\Exception\MailTransportException;
 use WebEtDesign\MailerBundle\Model\MailManagerInterface;
 use WebEtDesign\MailerBundle\Transport\MailTransportInterface;
@@ -21,13 +23,16 @@ class MailerListener
 
     private LoggerInterface $logger;
 
+    private EventDispatcherInterface $dispatcher;
+
     private array $constants = [];
 
-    public function __construct(MailManagerInterface $manager, TransportChain $transports, LoggerInterface $logger)
+    public function __construct(MailManagerInterface $manager, TransportChain $transports, EventDispatcherInterface $dispatcher, LoggerInterface $logger)
     {
         $this->manager    = $manager;
         $this->transports = $transports;
-        $this->logger = $logger;
+        $this->logger     = $logger;
+        $this->dispatcher = $dispatcher;
     }
 
     public function __invoke(Event $event, $key)
@@ -56,7 +61,8 @@ class MailerListener
                 throw new MailTransportException('Mail transport not found');
             }
             $res = $transport->send($mail, $locale, $values, $this->getRecipients($mail, $values));
-            $this->logger->info("Event " . $name . ' catch by mail listener, res = ' . $res);
+            $this->logger->info("Event ".$name.' catch by mail listener, res = '.$res);
+            $this->dispatcher->dispatch(new EmailSentEvent($event), EmailSentEvent::NAME);
         }
     }
 
@@ -85,7 +91,7 @@ class MailerListener
 
 
             foreach ($split as $item) {
-                $method = 'get' . ucfirst($item);
+                $method = 'get'.ucfirst($item);
                 if (!method_exists($dest, $method)) {
                     $dest = null;
                     break;
@@ -122,6 +128,7 @@ class MailerListener
     public function setConstant(string $key, string $constant): MailerListener
     {
         $this->constants[$key] = $constant;
+
         return $this;
     }
 }
