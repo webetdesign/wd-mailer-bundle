@@ -2,7 +2,7 @@
 
 namespace WebEtDesign\MailerBundle\EventListener;
 
-use Psr\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use ReflectionClassConstant;
 use ReflectionException;
