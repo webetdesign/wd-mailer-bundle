@@ -5,7 +5,9 @@ namespace WebEtDesign\MailerBundle\EventListener;
 use Psr\Log\LoggerInterface;
 use ReflectionClassConstant;
 use ReflectionException;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Contracts\EventDispatcher\Event;
+use WebEtDesign\MailerBundle\Event\EmailSentEvent;
 use WebEtDesign\MailerBundle\Event\MailEventInterface;
 use WebEtDesign\MailerBundle\Exception\MailTransportException;
 use WebEtDesign\MailerBundle\Model\MailManagerInterface;
@@ -22,13 +24,16 @@ class MailerListener
 
     private LoggerInterface $logger;
 
+    private EventDispatcher $dispatcher;
+
     private array $constants = [];
 
-    public function __construct(MailManagerInterface $manager, TransportChain $transports, LoggerInterface $logger)
+    public function __construct(MailManagerInterface $manager, TransportChain $transports, EventDispatcher $dispatcher, LoggerInterface $logger)
     {
         $this->manager    = $manager;
         $this->transports = $transports;
-        $this->logger = $logger;
+        $this->dispatcher = $dispatcher;
+        $this->logger     = $logger;
     }
 
     /**
@@ -39,7 +44,7 @@ class MailerListener
     {
         $className = get_class($event);
 
-        if (!array_key_exists(MailEventInterface::class, class_implements($className))){
+        if (!array_key_exists(MailEventInterface::class, class_implements($className))) {
             return;
         }
 
@@ -66,7 +71,8 @@ class MailerListener
                 throw new MailTransportException('Mail transport not found');
             }
             $res = $transport->send($mail, $locale, $values, $this->getRecipients($mail, $values));
-            $this->logger->info("Event " . $name . ' catch by mail listener, res = ' . $res);
+            $this->logger->info("Event ".$name.' catch by mail listener, res = '.$res);
+            $this->dispatcher->dispatch(new EmailSentEvent($event),EmailSentEvent::NAME);
         }
     }
 
@@ -95,7 +101,7 @@ class MailerListener
 
 
             foreach ($split as $split_item) {
-                $method = 'get' . ucfirst($split_item);
+                $method = 'get'.ucfirst($split_item);
                 if (!method_exists($dest, $method)) {
                     $dest = null;
                     break;
