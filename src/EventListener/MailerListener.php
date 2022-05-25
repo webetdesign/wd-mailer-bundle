@@ -41,19 +41,12 @@ class MailerListener
      * @throws ReflectionException
      * @throws MailTransportException
      */
-    public function __invoke(Event $event, $key)
+    public function __invoke(Event $event, $name)
     {
         $className = get_class($event);
 
         if (!array_key_exists(MailEventInterface::class, class_implements($className))) {
             return;
-        }
-
-        try {
-            $constant = new ReflectionClassConstant($className, $key);
-            $name     = $constant->getValue();
-        } catch (ReflectionException $e) {
-            $name = $className;
         }
 
         $mails = $this->manager->findByEventName($name);
