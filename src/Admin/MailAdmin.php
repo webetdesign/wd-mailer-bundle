@@ -7,6 +7,7 @@ namespace WebEtDesign\MailerBundle\Admin;
 use A2lix\TranslationFormBundle\Form\Type\TranslationsFormsType;
 use JetBrains\PhpStorm\Pure;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Datagrid\DatagridInterface;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
@@ -229,5 +230,18 @@ final class MailAdmin extends AbstractAdmin
         }
 
         return array_flip($choices);
+    }
+
+    protected function configureDefaultSortValues(array &$sortValues): void
+    {
+        $sortValues[DatagridInterface::PER_PAGE] = 500;
+    }
+
+    public function getPerPageOptions(): array
+    {
+        $perPageOptions = parent::getPerPageOptions();
+        $perPageOptions[] = 500;
+
+        return $perPageOptions;
     }
 }
