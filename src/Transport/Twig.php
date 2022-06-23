@@ -77,6 +77,7 @@ class Twig implements MailTransportInterface
 
 
         $tpl     = $this->twig->createTemplate($mail->getContentHtml());
+
         try {
             $content = $tpl->render($values ?? []);
         } catch (Error $error) {
@@ -111,8 +112,7 @@ class Twig implements MailTransportInterface
             ->subject($mail->getTitle())
             ->from($mail->getFrom())
             ->html(
-                $content,
-                'text/html'
+                $content
             );
 
         if (is_array($to)) {
@@ -124,7 +124,7 @@ class Twig implements MailTransportInterface
         }
 
         if (isset($contentTxt)) {
-            $message->text($contentTxt, 'text/plain');
+            $message->text($contentTxt);
         }
 
         foreach($this->getAttachments($mail, $values) as $attachment) {
