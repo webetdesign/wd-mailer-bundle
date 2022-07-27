@@ -4,6 +4,7 @@ namespace WebEtDesign\MailerBundle\Transport;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
@@ -128,7 +129,7 @@ class Twig implements MailTransportInterface
         }
 
         foreach($this->getAttachments($mail, $values) as $attachment) {
-            $message->attachFromPath($attachment->getRealPath());
+            $message->attachFromPath($attachment->getRealPath(), $attachment->getClientOriginalName());
         }
 
         try {
@@ -209,7 +210,6 @@ class Twig implements MailTransportInterface
                 }
             }
         }
-
         return $attachments;
     }
 
