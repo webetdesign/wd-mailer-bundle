@@ -83,18 +83,19 @@ For use variables in "to" field set a value like this :
 Sending an email is based on the triggering of an event.
 
 Sample event
+
 ```php
 <?php
 
 namespace App\Event;
 
 use Symfony\Contracts\EventDispatcher\Event;
-use WebEtDesign\MailerBundle\Event\MailEventInterface;
+use WebEtDesign\MailerBundle\Event\AbstractMailEvent;use WebEtDesign\MailerBundle\Event\MailEventInterface;
 use WebEtDesign\MailerBundle\Attribute\MailEvent;
 use Symfony\Component\HttpFoundation\File\File;
 
 #[MailEvent(name: self::USER_CREATED, label: 'Utlisateur créé')]
-class UserCreateEvent extends Event implements MailEventInterface
+class UserCreateEvent extends AbstractMailEvent
 {
     public const USER_CREATED = 'USER_CREATED';
 

@@ -12,4 +12,5 @@ interface MailEventInterface
      */
     public function getFile(): null|array|File;
 
+    public function getReplyTo(): ?string;
 }

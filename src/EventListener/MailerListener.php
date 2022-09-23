@@ -64,7 +64,7 @@ class MailerListener
             if (!$transport instanceof MailTransportInterface) {
                 throw new MailTransportException('Mail transport not found');
             }
-            $res = $transport->send($mail, $locale, $values, $this->getRecipients($mail, $values));
+            $res = $transport->send($mail, $event, $locale, $values, $this->getRecipients($mail, $values));
             $this->logger->info("Event ".$name.' catch by mail listener, res = '.$res);
             $this->dispatcher->dispatch(new EmailSentEvent($event),EmailSentEvent::NAME);
         }

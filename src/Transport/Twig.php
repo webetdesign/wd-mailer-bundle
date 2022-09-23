@@ -21,6 +21,7 @@ use Twig\Error\SyntaxError;
 use WebEtDesign\MailerBundle\Entity\Mail;
 use WebEtDesign\MailerBundle\Entity\MailError;
 use WebEtDesign\MailerBundle\Entity\MailOnline;
+use WebEtDesign\MailerBundle\Event\MailEventInterface;
 use WebEtDesign\MailerBundle\Exception\MailTransportException;
 
 class Twig implements MailTransportInterface
@@ -54,7 +55,7 @@ class Twig implements MailTransportInterface
      * @throws LoaderError
      * @throws MailTransportException
      */
-    public function send(Mail $mail, $locale = null, $values = null, $to = null, $debug = false): ?int
+    public function send(Mail $mail, MailEventInterface $event, $locale = null, $values = null, $to = null, $debug = false): ?int
     {
         if (!$values) {
             $this->twig->disableStrictVariables();
@@ -76,8 +77,7 @@ class Twig implements MailTransportInterface
             $values['ONLINE_LINK'] = $online_link;
         }
 
-
-        $tpl     = $this->twig->createTemplate($mail->getContentHtml());
+        $tpl = $this->twig->createTemplate($mail->getContentHtml());
 
         try {
             $content = $tpl->render($values ?? []);
@@ -115,6 +115,10 @@ class Twig implements MailTransportInterface
             ->html(
                 $content
             );
+
+        if ($event->getReplyTo() !== null) {
+            $message->replyTo($event->getReplyTo());
+        }
 
         if (is_array($to)) {
             foreach ($to as $adress) {
