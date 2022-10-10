@@ -133,7 +133,11 @@ class Twig implements MailTransportInterface
         }
 
         foreach($this->getAttachments($mail, $values) as $attachment) {
-            $message->attachFromPath($attachment->getRealPath(), $attachment->getClientOriginalName());
+            if ($attachment instanceof UploadedFile) {
+                $message->attachFromPath($attachment->getRealPath(), $attachment->getClientOriginalName());
+            }else{
+                $message->attachFromPath($attachment->getRealPath(), $attachment->getFileName());
+            }
         }
 
         try {
