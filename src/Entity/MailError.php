@@ -3,6 +3,7 @@
 
 namespace WebEtDesign\MailerBundle\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -13,6 +14,8 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * @ORM\Entity
  * @ORM\Table(name="mailer__mail_error")
  */
+#[ORM\Entity]
+#[ORM\Table(name: "mailer__mail_error")]
 class MailError
 {
     /**
@@ -20,6 +23,9 @@ class MailError
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
+    #[ORM\Id]
+    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     protected ?int $id = null;
 
     /**
@@ -27,6 +33,7 @@ class MailError
      *
      * @ORM\Column(type="string")
      */
+    #[ORM\Column(type: Types::STRING)]
     protected ?string $mail = null;
 
     /**
@@ -34,6 +41,7 @@ class MailError
      *
      * @ORM\Column(type="text")
      */
+    #[ORM\Column(type: Types::TEXT)]
     protected ?string $object = null;
 
     /**
