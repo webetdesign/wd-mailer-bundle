@@ -2,9 +2,11 @@
 
 namespace WebEtDesign\MailerBundle\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
 use Knp\DoctrineBehaviors\Model\Translatable\TranslatableTrait;
+use Nette\Utils\Type;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
@@ -17,6 +19,8 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  * @method string getContentHtml()
  * @method null|string getContentTxt()
  */
+#[ORM\Entity]
+#[ORM\Table(name: "mailer__mail")]
 class Mail implements TranslatableInterface
 {
     use TranslatableTrait;
@@ -26,36 +30,45 @@ class Mail implements TranslatableInterface
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
+    #[ORM\Id]
+    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private ?int $id = null;
 
     /**
      * @ORM\Column(type="string", nullable=false, name="name")
      */
+    #[ORM\Column(name: 'name', type: Types::STRING, nullable: false)]
     private string $name = '';
 
     /**
      * @ORM\Column(type="string", nullable=false, name="event")
      */
+    #[ORM\Column(name: 'event', type: Types::STRING, nullable: false)]
     private string $event = '';
 
     /**
      * @ORM\Column(type="text", nullable=false, name="`to`")
      */
+    #[ORM\Column(name: "`to`", type: Types::TEXT, nullable: false)]
     private string $to = '';
 
     /**
      * @ORM\Column(type="string", nullable=false, name="`from`")
      */
+    #[ORM\Column(name: "`from`", type: Types::STRING, nullable: false)]
     private string $from = '';
 
     /**
      * @ORM\Column(type="string", nullable=true, name="attachments")
      */
+    #[ORM\Column(name: 'attachments', type: Types::STRING, nullable: false)]
     private ?string $attachments = null;
 
     /**
      * @ORM\Column(type="boolean", nullable=false)
      */
+    #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
     private bool $online;
 
     public function __toString()
