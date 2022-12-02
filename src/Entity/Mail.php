@@ -62,7 +62,7 @@ class Mail implements TranslatableInterface
     /**
      * @ORM\Column(type="string", nullable=true, name="attachments")
      */
-    #[ORM\Column(name: 'attachments', type: Types::STRING, nullable: false)]
+    #[ORM\Column(name: 'attachments', type: Types::STRING, nullable: true)]
     private ?string $attachments = null;
 
     /**
