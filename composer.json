@@ -20,17 +20,17 @@
     "doctrine/doctrine-bundle": "^1.12 || ^2.0",
     "doctrine/orm": "^2.6.4 || ^3.0",
     "knplabs/doctrine-behaviors": "^2.0",
-    "webetdesign/aceeditor-bundle": "^5",
-    "symfony/form": "^5.4",
-    "symfony/dependency-injection": "^5.4",
-    "symfony/mailer": "5.4.*"
+    "symfony/dependency-injection": "^5.4 || ^6.0",
+    "symfony/form": "^5.4 || ^6.0",
+    "symfony/mailer": "5.4.* || ^6.0",
+    "webetdesign/aceeditor-bundle": "^5 || ^6.0"
   },
   "require-dev": {
     "sonata-project/admin-bundle": "^4.0",
-    "symfony/filesystem": "^5.4",
-    "symfony/phpunit-bridge": "^5.4",
-    "symfony/twig-bundle": "^5.4",
-    "symfony/yaml": "^5.4"
+    "symfony/filesystem": "^5.4 || ^6.0",
+    "symfony/phpunit-bridge": "^5.4 || ^6.0",
+    "symfony/twig-bundle": "^5.4 || ^6.0",
+    "symfony/yaml": "^5.4 || ^6.0"
   },
   "config": {
     "sort-packages": true
