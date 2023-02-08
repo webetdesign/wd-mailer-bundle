@@ -22,8 +22,7 @@
     "knplabs/doctrine-behaviors": "^2.0",
     "symfony/dependency-injection": "^5.4 || ^6.0",
     "symfony/form": "^5.4 || ^6.0",
-    "symfony/mailer": "5.4.* || ^6.0",
-    "webetdesign/aceeditor-bundle": "^5"
+    "symfony/mailer": "5.4.* || ^6.0"
   },
   "require-dev": {
     "sonata-project/admin-bundle": "^4.0",
