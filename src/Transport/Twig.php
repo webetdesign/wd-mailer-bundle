@@ -26,29 +26,14 @@ use WebEtDesign\MailerBundle\Exception\MailTransportException;
 
 class Twig implements MailTransportInterface
 {
-    private Environment  $twig;
-    private Serializer $serializer;
-    private RouterInterface $router;
-    private EntityManagerInterface $em;
-    private ParameterBagInterface $parameterBag;
-    private MailerInterface $mailer;
-
-
     public function __construct(
-        Environment $twig,
-        MailerInterface $mailer,
-        RouterInterface $router,
-        EntityManagerInterface $em,
-        ParameterBagInterface $parameterBag,
-        SerializerInterface $serializer
-    ) {
-        $this->twig         = $twig;
-        $this->mailer       = $mailer;
-        $this->router       = $router;
-        $this->em           = $em;
-        $this->parameterBag = $parameterBag;
-        $this->serializer = $serializer;
-    }
+        private Environment $twig,
+        private MailerInterface $mailer,
+        private RouterInterface $router,
+        private EntityManagerInterface $em,
+        private ParameterBagInterface $parameterBag,
+        private SerializerInterface $serializer
+    ) {}
 
     /**
      * @throws SyntaxError

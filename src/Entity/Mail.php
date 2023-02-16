@@ -10,11 +10,6 @@ use Nette\Utils\Type;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
- * Class Mail
- * @package WebEtDesign\MailerBundle\Entity
- *
- * @ORM\Entity
- * @ORM\Table(name="mailer__mail")
  * @method string getTitle()
  * @method string getContentHtml()
  * @method null|string getContentTxt()
@@ -25,49 +20,26 @@ class Mail implements TranslatableInterface
 {
     use TranslatableTrait;
 
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]
     #[ORM\GeneratedValue(strategy: 'AUTO')]
     private ?int $id = null;
 
-    /**
-     * @ORM\Column(type="string", nullable=false, name="name")
-     */
     #[ORM\Column(name: 'name', type: Types::STRING, nullable: false)]
     private string $name = '';
 
-    /**
-     * @ORM\Column(type="string", nullable=false, name="event")
-     */
     #[ORM\Column(name: 'event', type: Types::STRING, nullable: false)]
     private string $event = '';
 
-    /**
-     * @ORM\Column(type="text", nullable=false, name="`to`")
-     */
     #[ORM\Column(name: "`to`", type: Types::TEXT, nullable: false)]
     private string $to = '';
 
-    /**
-     * @ORM\Column(type="string", nullable=false, name="`from`")
-     */
     #[ORM\Column(name: "`from`", type: Types::STRING, nullable: false)]
     private string $from = '';
 
-    /**
-     * @ORM\Column(type="string", nullable=true, name="attachments")
-     */
     #[ORM\Column(name: 'attachments', type: Types::STRING, nullable: true)]
     private ?string $attachments = null;
 
-    /**
-     * @ORM\Column(type="boolean", nullable=false)
-     */
     #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
     private bool $online;
 

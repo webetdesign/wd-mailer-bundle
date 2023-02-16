@@ -1,6 +1,6 @@
 <?php
 
-namespace WebEtDesign\MailerBundle\DependencyInjection\Compiler;
+namespace WebEtDesign\MailerBundle\Compiler;
 
 use ReflectionClass;
 use ReflectionException;

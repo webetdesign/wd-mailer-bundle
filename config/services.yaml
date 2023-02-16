@@ -8,9 +8,15 @@ services:
       tags: [ 'mailer.transport' ]
 
   WebEtDesign\MailerBundle\:
-    resource: '../../*'
-    exclude: '../../{DependencyInjection,Controller,Entity,Migrations,Tests,Kernel.php}'
+    resource: '../src'
+    exclude:
+      - '../src/DependencyInjection'
+      - '../src/Controller'
+      - '../src/Entity'
+      - '../src/Migrations'
+      - '../src/Tests'
+      - '../src/Kernel.php'
 
   WebEtDesign\MailerBundle\Controller\:
-    resource: '../../Controller/*'
+    resource: '../src/Controller/'
     tags: [ 'controller.service_arguments' ]

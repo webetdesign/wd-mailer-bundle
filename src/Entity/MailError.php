@@ -7,40 +7,18 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * Class Mail
- * @package WebEtDesign\MailerBundle\Entity
- *
- * @ORM\Entity
- * @ORM\Table(name="mailer__mail_error")
- */
 #[ORM\Entity]
 #[ORM\Table(name: "mailer__mail_error")]
 class MailError
 {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]
     #[ORM\GeneratedValue(strategy: 'AUTO')]
     protected ?int $id = null;
 
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(type="string")
-     */
     #[ORM\Column(type: Types::STRING)]
     protected ?string $mail = null;
 
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(type="text")
-     */
     #[ORM\Column(type: Types::TEXT)]
     protected ?string $object = null;
 

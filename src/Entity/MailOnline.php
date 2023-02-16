@@ -7,52 +7,25 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * Class Mail
- * @package WebEtDesign\MailerBundle\Entity
- *
- * @ORM\Entity
- * @ORM\Table(name="mailer__mail_online")
- */
 #[ORM\Entity]
 #[ORM\Table(name: "mailer__mail_online")]
 class MailOnline
 {
-
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]
     #[ORM\GeneratedValue(strategy: 'AUTO')]
     protected ?int $id = null;
 
-    /**
-     * @ORM\Column(type="string", nullable=false)
-     */
     #[ORM\Column(type: Types::STRING, nullable: false)]
     protected string $hash = '';
 
-    /**
-     * @ORM\Column(type="text", nullable=false)
-     */
     #[ORM\Column(type: Types::TEXT, nullable: false)]
     protected string $html = '';
 
-    /**
-     * @ORM\Column(type="datetime")
-     * @Gedmo\Timestampable(on="create")
-     */
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Gedmo\Timestampable(on: "create")]
     protected $created_at = null;
-    
-    /**
-     * @ORM\Column(type="datetime")
-     * @Gedmo\Timestampable(on="create")
-     */
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Gedmo\Timestampable(on: "create")]
     protected $updated_at = null;

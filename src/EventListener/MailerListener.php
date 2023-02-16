@@ -19,23 +19,13 @@ use WebEtDesign\MailerBundle\Entity\Mail;
 
 class MailerListener
 {
-    private MailManagerInterface $manager;
-
-    private TransportChain $transports;
-
-    private LoggerInterface $logger;
-
-    private EventDispatcherInterface $dispatcher;
-
-    private array $constants = [];
-
-    public function __construct(MailManagerInterface $manager, TransportChain $transports, EventDispatcherInterface $dispatcher, LoggerInterface $logger)
-    {
-        $this->manager    = $manager;
-        $this->transports = $transports;
-        $this->dispatcher = $dispatcher;
-        $this->logger     = $logger;
-    }
+    public function __construct(
+        private MailManagerInterface $manager,
+        private TransportChain $transports,
+        private EventDispatcherInterface $dispatcher,
+        private LoggerInterface $logger,
+        private array $constants = []
+    ) {}
 
     /**
      * @throws ReflectionException

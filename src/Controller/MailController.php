@@ -12,13 +12,8 @@ use WebEtDesign\MailerBundle\Entity\MailOnline;
 
 class MailController extends AbstractController
 {
-
-    /**
-     * @Route("/mail/{hash}", name="wd_mailer_mail_view")
-     * @ParamConverter("mail", options={"mapping": {"hash": "hash"}})
-     * @param MailOnline $mail
-     * @return Response
-     */
+    #[ParamConverter('mail', options: ['mapping' => ['hash' => 'hash']])]
+    #[Route('/mail/{hash}', name: 'wd_mailer_mail_view')]
     public function __invoke(MailOnline $mail): Response
     {
         return new Response($mail->getHtml());

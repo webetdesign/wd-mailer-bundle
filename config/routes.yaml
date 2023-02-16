@@ -1,0 +1,3 @@
+wd_mailer.controller:
+  resource: '../src/Controller/'
+  type: attribute
