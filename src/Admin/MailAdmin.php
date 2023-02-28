@@ -26,25 +26,20 @@ use WebEtDesign\MailerBundle\Util\ObjectConverter;
 
 final class MailAdmin extends AbstractAdmin
 {
-    private ParameterBagInterface $parameterBag;
+    private array $mailEvents;
 
-    /**
-     * @inheritDoc
-     */
     public function __construct(
-        $code,
-        $class,
-        $baseControllerName,
-        ParameterBagInterface $parameterBag,
-        MailEventManager $mailEventManager
-    ) {
+        private ParameterBagInterface $parameterBag,
+        private MailEventManager $mailEventManager,
+        ?string $code = null,
+        ?string $class = null,
+        ?string $baseControllerName = null
+    )
+    {
+        $this->mailEvents = $this->mailEventManager->getEvents();
         parent::__construct($code, $class, $baseControllerName);
-        $this->parameterBag = $parameterBag;
-        $this->mailEvents = $mailEventManager->getEvents();
     }
 
-
-    private array $mailEvents;
 
     protected function configureRoutes(RouteCollectionInterface $collection): void
     {

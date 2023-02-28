@@ -1,14 +1,12 @@
 services:
+  _defaults:
+    autowire: true      # Automatically injects dependencies in your services.
+    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
   admin.mail:
     class: WebEtDesign\MailerBundle\Admin\MailAdmin
-    arguments:
-      - ~
-      - WebEtDesign\MailerBundle\Entity\Mail
-      - WebEtDesign\MailerBundle\Controller\MailAdminController
-      - '@parameter_bag'
-      - '@WebEtDesign\MailerBundle\Services\MailEventManager'
     tags:
-      - { name: sonata.admin, manager_type: orm, group: CMS, label: Mails }
+      - { name: sonata.admin, model_class: WebEtDesign\MailerBundle\Entity\Mail, controller: WebEtDesign\MailerBundle\Controller\MailAdminController, manager_type: orm, group: CMS, label: Mails }
     public: true
     calls:
       - [ setTemplate, [ 'button_test', '@@WDMailer/admin/mail/test_button.html.twig' ] ]

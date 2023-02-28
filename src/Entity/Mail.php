@@ -2,6 +2,8 @@
 
 namespace WebEtDesign\MailerBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
@@ -15,7 +17,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  * @method null|string getContentTxt()
  */
 #[ORM\Entity]
-#[ORM\Table(name: "mailer__mail")]
+#[ORM\Table(name: 'mailer__mail')]
 class Mail implements TranslatableInterface
 {
     use TranslatableTrait;
@@ -31,10 +33,10 @@ class Mail implements TranslatableInterface
     #[ORM\Column(name: 'event', type: Types::STRING, nullable: false)]
     private string $event = '';
 
-    #[ORM\Column(name: "`to`", type: Types::TEXT, nullable: false)]
+    #[ORM\Column(name: '`to`', type: Types::TEXT, nullable: false)]
     private string $to = '';
 
-    #[ORM\Column(name: "`from`", type: Types::STRING, nullable: false)]
+    #[ORM\Column(name: '`from`', type: Types::STRING, nullable: false)]
     private string $from = '';
 
     #[ORM\Column(name: 'attachments', type: Types::STRING, nullable: true)]
@@ -161,17 +163,17 @@ class Mail implements TranslatableInterface
 
     // Getter and setter for split input in few tabs in admin form
 
-    public function getTranslationsTitle()
+    public function getTranslationsTitle(): ArrayCollection|Collection
     {
         return $this->getTranslations();
     }
 
-    public function getTranslationsContentHtml()
+    public function getTranslationsContentHtml(): ArrayCollection|Collection
     {
         return $this->getTranslations();
     }
 
-    public function getTranslationsContentText()
+    public function getTranslationsContentText(): ArrayCollection|Collection
     {
         return $this->getTranslations();
     }
