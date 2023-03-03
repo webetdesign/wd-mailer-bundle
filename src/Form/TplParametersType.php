@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 
 namespace WebEtDesign\MailerBundle\Form;
@@ -22,7 +23,7 @@ class TplParametersType extends AbstractType
         $resolver->setRequired(['params']);
     }
 
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'wd_mailer_tpl_params';
     }

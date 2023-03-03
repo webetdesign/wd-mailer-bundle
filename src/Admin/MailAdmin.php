@@ -29,15 +29,12 @@ final class MailAdmin extends AbstractAdmin
     private array $mailEvents;
 
     public function __construct(
-        private ParameterBagInterface $parameterBag,
-        private MailEventManager $mailEventManager,
-        ?string $code = null,
-        ?string $class = null,
-        ?string $baseControllerName = null
+        private readonly ParameterBagInterface $parameterBag,
+        private readonly MailEventManager $mailEventManager,
     )
     {
         $this->mailEvents = $this->mailEventManager->getEvents();
-        parent::__construct($code, $class, $baseControllerName);
+        parent::__construct();
     }
 
 
