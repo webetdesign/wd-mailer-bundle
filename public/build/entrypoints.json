@@ -1,0 +1,9 @@
+{
+  "entrypoints": {
+    "mailer": {
+      "js": [
+        "/bundles/wdmailer/build/mailer.js"
+      ]
+    }
+  }
+}

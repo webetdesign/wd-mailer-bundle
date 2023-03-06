@@ -95,7 +95,7 @@ final class MailAdmin extends AbstractAdmin
         $locale  = $this->parameterBag->get('wd_mailer.default_locale');
 
         $this->setFormTheme(array_merge($this->getFormTheme(), [
-            '@WDMailer/admin/form/wd_mailer_tpl_params.html.twig'
+            '@WDMailer/admin/form/form_layout.html.twig'
         ]));
 
         /** @var Mail $subject */

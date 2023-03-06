@@ -16,3 +16,15 @@
         </tbody>
     </table>
 {% endblock %}
+
+{% block wd_mailer_twig_ace_editor_widget %}
+    <div data-controller="mailer-ace-editor">
+        {{ form_widget(form, {attr: {
+            'data-mailer-ace-editor-target': 'input',
+            'style': 'display: none'
+        }}) }}
+        <div data-mailer-ace-editor-target="editor" style="width: 100%; aspect-ratio: 16/10">
+            {{- form.vars.value -}}
+        </div>
+    </div>
+{% endblock %}
