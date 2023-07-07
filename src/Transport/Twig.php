@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Serializer\Serializer;
@@ -26,28 +27,28 @@ use WebEtDesign\MailerBundle\Exception\MailTransportException;
 
 class Twig implements MailTransportInterface
 {
-    private Environment  $twig;
-    private Serializer $serializer;
-    private RouterInterface $router;
+    private Environment            $twig;
+    private Serializer             $serializer;
+    private RouterInterface        $router;
     private EntityManagerInterface $em;
-    private ParameterBagInterface $parameterBag;
-    private MailerInterface $mailer;
-
+    private ParameterBagInterface  $parameterBag;
+    private MailerInterface        $mailer;
 
     public function __construct(
-        Environment $twig,
-        MailerInterface $mailer,
-        RouterInterface $router,
+        Environment            $twig,
+        MailerInterface        $mailer,
+        RouterInterface        $router,
         EntityManagerInterface $em,
-        ParameterBagInterface $parameterBag,
-        SerializerInterface $serializer
-    ) {
+        ParameterBagInterface  $parameterBag,
+        SerializerInterface    $serializer
+    )
+    {
         $this->twig         = $twig;
         $this->mailer       = $mailer;
         $this->router       = $router;
         $this->em           = $em;
         $this->parameterBag = $parameterBag;
-        $this->serializer = $serializer;
+        $this->serializer   = $serializer;
     }
 
     /**
@@ -67,7 +68,7 @@ class Twig implements MailTransportInterface
 
         $mail->setCurrentLocale($locale);
 
-        $hash        = hash('sha256',
+        $hash = hash('sha256',
             $mail->getId() . $mail->getFrom() . $mail->getTitle() . time());
 
         $online_link = $this->router->generate('wd_mailer_mail_view', ['hash' => $hash],
@@ -82,13 +83,13 @@ class Twig implements MailTransportInterface
         try {
             $content = $tpl->render($values ?? []);
         } catch (Error $error) {
-            if(!$debug) {
+            if (!$debug) {
                 try {
                     $this->alertAdministrators($mail, $values, $error->getRawMessage());
-                } catch (TransportExceptionInterface | LoaderError | RuntimeError | SyntaxError | Throwable $e) {
+                } catch (TransportExceptionInterface|LoaderError|RuntimeError|SyntaxError|Throwable $e) {
                 }
             }
-            if($this->parameterBag->get("kernel.environment") === "dev") {
+            if ($this->parameterBag->get("kernel.environment") === "dev") {
                 throw new MailTransportException($error->getRawMessage());
             } else {
                 return 0;
@@ -110,7 +111,7 @@ class Twig implements MailTransportInterface
         }
 
         $message = (new Email())
-            ->subject($mail->getTitle())
+            ->subject($this->parseAndReplaceTitleVars($mail->getTitle(), $event))
             ->from($mail->getFrom())
             ->html(
                 $content
@@ -132,16 +133,17 @@ class Twig implements MailTransportInterface
             $message->text($contentTxt);
         }
 
-        foreach($this->getAttachments($mail, $values) as $attachment) {
+        foreach ($this->getAttachments($mail, $values) as $attachment) {
             if ($attachment instanceof UploadedFile) {
                 $message->attachFromPath($attachment->getRealPath(), $attachment->getClientOriginalName());
-            }else{
+            } else {
                 $message->attachFromPath($attachment->getRealPath(), $attachment->getFileName());
             }
         }
 
         try {
             $this->mailer->send($message);
+
             return 1;
         } catch (TransportExceptionInterface $e) {
             return 0;
@@ -155,7 +157,8 @@ class Twig implements MailTransportInterface
      * @throws RuntimeError
      * @throws LoaderError
      */
-    public function alertAdministrators(Mail $mail, $values, $error) {
+    public function alertAdministrators(Mail $mail, $values, $error)
+    {
         $mailError = new MailError();
         $mailError
             ->setMail($mail)
@@ -163,11 +166,11 @@ class Twig implements MailTransportInterface
         $this->em->persist($mailError);
         $this->em->flush();
 
-        $project = $this->router->getContext()->getHost();
-        $url = $this->router->getContext()->getPathInfo();
+        $project  = $this->router->getContext()->getHost();
+        $url      = $this->router->getContext()->getPathInfo();
         $template = $mail->getName();
-        $tpl     = $this->twig->loadTemplate('@WDMailer/admin/mail/error.html.twig');
-        $content = $tpl->render(['project' => $project, 'template' => $template, 'error' => $error, 'url' => $url, 'mailErrorId' => $mailError->getId()]);
+        $tpl      = $this->twig->loadTemplate('@WDMailer/admin/mail/error.html.twig');
+        $content  = $tpl->render(['project' => $project, 'template' => $template, 'error' => $error, 'url' => $url, 'mailErrorId' => $mailError->getId()]);
 
         $message = (new Email())
             ->subject('Erreur lors de la soumission du mail')
@@ -181,9 +184,9 @@ class Twig implements MailTransportInterface
     }
 
     /**
-    * @param Mail $mail
-    * @param $values
-    * @return array
+     * @param Mail $mail
+     * @param $values
+     * @return array
      */
     private function getAttachments(Mail $mail, $values): array
     {
@@ -197,9 +200,8 @@ class Twig implements MailTransportInterface
 
             unset($attachments[$k]);
 
-            $split = explode('.', $matches[1]);
-            $attachment  = $values[array_shift($split)] ?? [];
-
+            $split      = explode('.', $matches[1]);
+            $attachment = $values[array_shift($split)] ?? [];
 
             foreach ($split as $slip_item) {
                 $method = 'get' . ucfirst($slip_item);
@@ -218,7 +220,28 @@ class Twig implements MailTransportInterface
                 }
             }
         }
+
         return $attachments;
+    }
+
+    private function parseAndReplaceTitleVars($title, MailEventInterface $event): string
+    {
+        preg_match_all('/__.+?__/', $title, $matches);
+
+        $accessor = new PropertyAccessor();
+
+        $vars = [];
+
+        foreach ($matches[0] ?? [] as $match) {
+            $var = substr($match, 2);
+            $var = substr($var, 0, -2);
+
+            if ($accessor->isReadable($event, $var)) {
+                $vars[$match] = $accessor->getValue($event, $var);
+            }
+        }
+
+        return str_replace(array_keys($vars), array_values($vars), $title);
     }
 
     public function getMailer(): MailerInterface
