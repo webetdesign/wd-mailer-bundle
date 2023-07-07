@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Serializer\Serializer;
@@ -95,7 +96,7 @@ class Twig implements MailTransportInterface
         }
 
         $message = (new Email())
-            ->subject($mail->getTitle())
+            ->subject($this->parseAndReplaceTitleVars($mail->getTitle(), $event))
             ->from($mail->getFrom())
             ->html(
                 $content
@@ -204,6 +205,26 @@ class Twig implements MailTransportInterface
             }
         }
         return $attachments;
+    }
+
+    private function parseAndReplaceTitleVars($title, MailEventInterface $event): string
+    {
+        preg_match_all('/__.+?__/', $title, $matches);
+
+        $accessor = new PropertyAccessor();
+
+        $vars = [];
+
+        foreach ($matches[0] ?? [] as $match) {
+            $var = substr($match, 2);
+            $var = substr($var, 0, -2);
+
+            if ($accessor->isReadable($event, $var)) {
+                $vars[$match] = $accessor->getValue($event, $var);
+            }
+        }
+
+        return str_replace(array_keys($vars), array_values($vars), $title);
     }
 
     public function getMailer(): MailerInterface
