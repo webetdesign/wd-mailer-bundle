@@ -30,13 +30,12 @@ final class MailAdmin extends AbstractAdmin
 
     public function __construct(
         private readonly ParameterBagInterface $parameterBag,
-        private readonly MailEventManager $mailEventManager,
+        private readonly MailEventManager      $mailEventManager,
     )
     {
         $this->mailEvents = $this->mailEventManager->getEvents();
         parent::__construct();
     }
-
 
     protected function configureRoutes(RouteCollectionInterface $collection): void
     {
@@ -121,7 +120,9 @@ final class MailAdmin extends AbstractAdmin
 
         $formMapper
             ->with('', ['class' => 'col-md-6', 'box_class' => 'box box-primary box-no-header'])
-            ->add('from', null, ['label' => 'De'])
+            ->add('from', null, ['label' => 'De (email)', 'row_attr' => ['class' => 'col-md-6', 'style' => 'padding-left: 0px;']])
+            ->add('fromName', null, ['label' => 'De (nom)', 'row_attr' => ['class' => 'col-md-6', 'style' => 'padding-right: 0px;']])
+            ->add('replyTo', null, ['label' => 'Répondre à'])
             ->add('to', null, [
                 'label' => 'Destinataire(s)',
                 'help'  => 'Un ou plusieurs emails séparés par des virgules ou des retours ligne. ' .
@@ -129,11 +130,9 @@ final class MailAdmin extends AbstractAdmin
             ])
             ->add('attachments', null, [
                 'required' => false,
-                'label' => 'Fichiers joints',
-                'help'  =>'Les variables de type fichier acceptées sous cette syntaxe : __fichier__',
-            ])
-        ;
-
+                'label'    => 'Fichiers joints',
+                'help'     => 'Les variables de type fichier acceptées sous cette syntaxe : __fichier__',
+            ]);
 
         $formMapper
             //            ->add('title', null, ['label' => 'Objet'])
@@ -148,7 +147,7 @@ final class MailAdmin extends AbstractAdmin
             ->end()
             ->end();
 
-        if ($subject->getId()){
+        if ($subject->getId()) {
             $formMapper
                 ->tab('HTML')
                 ->with('Contenu HTML',
@@ -212,7 +211,6 @@ final class MailAdmin extends AbstractAdmin
         return $this->mailEvents;
     }
 
-
     #[Pure] public function getMailEventsChoices(): array
     {
         $events  = $this->getMailEvents();
@@ -231,7 +229,7 @@ final class MailAdmin extends AbstractAdmin
 
     public function getPerPageOptions(): array
     {
-        $perPageOptions = parent::getPerPageOptions();
+        $perPageOptions   = parent::getPerPageOptions();
         $perPageOptions[] = 500;
 
         return $perPageOptions;
