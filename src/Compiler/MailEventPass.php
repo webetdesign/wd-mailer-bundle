@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace WebEtDesign\MailerBundle\Compiler;
 
@@ -8,7 +9,7 @@ use WebEtDesign\MailerBundle\Services\MailEventManager;
 
 class MailEventPass implements CompilerPassInterface
 {
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $eventManager = $container->getDefinition(MailEventManager::class);
 
