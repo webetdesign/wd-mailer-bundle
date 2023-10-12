@@ -12,13 +12,13 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class TplParametersType extends AbstractType
 {
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars['params'] = $options['params'];
     }
 
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setRequired(['params']);
     }

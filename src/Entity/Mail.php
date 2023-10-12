@@ -39,11 +39,17 @@ class Mail implements TranslatableInterface
     #[ORM\Column(name: '`from`', type: Types::STRING, nullable: false)]
     private string $from = '';
 
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    private ?string $fromName = null;
+
     #[ORM\Column(name: 'attachments', type: Types::STRING, nullable: true)]
     private ?string $attachments = null;
 
     #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
     private bool $online;
+
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    private ?string $replyTo = null;
 
     public function __toString()
     {
@@ -157,9 +163,9 @@ class Mail implements TranslatableInterface
     public function setOnline(bool $online): Mail
     {
         $this->online = $online;
+
         return $this;
     }
-
 
     // Getter and setter for split input in few tabs in admin form
 
@@ -203,5 +209,43 @@ class Mail implements TranslatableInterface
         foreach ($translations as $translation) {
             $this->addTranslation($translation);
         }
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getFromName(): ?string
+    {
+        return $this->fromName;
+    }
+
+    /**
+     * @param string|null $fromName
+     * @return Mail
+     */
+    public function setFromName(?string $fromName): Mail
+    {
+        $this->fromName = $fromName;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getReplyTo(): ?string
+    {
+        return $this->replyTo;
+    }
+
+    /**
+     * @param string|null $replyTo
+     * @return Mail
+     */
+    public function setReplyTo(?string $replyTo): Mail
+    {
+        $this->replyTo = $replyTo;
+
+        return $this;
     }
 }
