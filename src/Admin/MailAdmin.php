@@ -45,7 +45,7 @@ final class MailAdmin extends AbstractAdmin
     /**
      * @inheritDoc
      */
-    public function configureActionButtons(array $list, string $action, ?object $object = null): array
+    protected function configureActionButtons(array $list, string $action, ?object $object = null): array
     {
         if (in_array($action, ['show', 'edit'], true)
             && $this->hasRoute('test')
@@ -106,22 +106,23 @@ final class MailAdmin extends AbstractAdmin
 
         $formMapper
             ->tab('Général')
-            ->with('#', ['class' => 'col-md-6', 'box_class' => 'box box-primary box-no-header'])
+            ->with('#', ['class' => 'col-md-6', 'box_class' => 'header_none'])
             ->add('name')
             ->add('event', ChoiceType::class, [
+                'label' => 'Évènement',
                 'choices' => $this->getMailEventsChoices()
             ])
-            ->add('online', CheckboxType::class, [
-                'help'     => 'Permets d’enregistrer les mails pour le visualiser en ligne. ' .
-                    'Ajouter dans le template HTML un lien avec comme href : {{ ONLINE_LINK }}',
-                'required' => false,
-            ])
+//            ->add('online', CheckboxType::class, [
+//                'help'     => 'Permets d’enregistrer les mails pour le visualiser en ligne. ' .
+//                    'Ajouter dans le template HTML un lien avec comme href : {{ ONLINE_LINK }}',
+//                'required' => false,
+//            ])
             ->end();
 
         $formMapper
-            ->with('', ['class' => 'col-md-6', 'box_class' => 'box box-primary box-no-header'])
-            ->add('from', null, ['label' => 'De (email)', 'row_attr' => ['class' => 'col-md-6', 'style' => 'padding-left: 0px;']])
-            ->add('fromName', null, ['label' => 'De (nom)', 'row_attr' => ['class' => 'col-md-6', 'style' => 'padding-right: 0px;']])
+            ->with('', ['class' => 'col-md-6', 'box_class' => 'header_none'])
+            ->add('from', null, ['label' => 'Courriel de l\'émetteur', 'row_attr' => ['class' => 'col-md-6', 'style' => 'padding-left: 0px;']])
+            ->add('fromName', null, ['label' => 'Nom de l\'émetteur', 'row_attr' => ['class' => 'col-md-6', 'style' => 'padding-right: 0px;']])
             ->add('replyTo', null, ['label' => 'Répondre à'])
             ->add('to', null, [
                 'label' => 'Destinataire(s)',
@@ -149,9 +150,9 @@ final class MailAdmin extends AbstractAdmin
 
         if ($subject->getId()) {
             $formMapper
-                ->tab('HTML')
-                ->with('Contenu HTML',
-                    ['class' => 'col-md-8', 'box_class' => 'box box-primary box-no-header'])
+                ->tab('Contenu HTML')
+                ->with('HTML',
+                    ['class' => 'col-md-8', 'box_class' => 'header_none'])
                 ->add('translationsContentHtml', TranslationsFormsType::class, [
                     'label'          => false,
                     'locales'        => $locales,
@@ -170,8 +171,8 @@ final class MailAdmin extends AbstractAdmin
                 ->end();
 
             $formMapper
-                ->tab('Texte')
-                ->with('', ['class' => 'col-md-8', 'box_class' => 'box box-primary box-no-header'])
+                ->tab('Version texte')
+                ->with('', ['class' => 'col-md-8', 'box_class' => 'header_none'])
                 ->add('translationsContentText', TranslationsFormsType::class, [
                     'label'          => false,
                     'locales'        => $locales,
