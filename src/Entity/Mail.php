@@ -45,9 +45,6 @@ class Mail implements TranslatableInterface
     #[ORM\Column(name: 'attachments', type: Types::STRING, nullable: true)]
     private ?string $attachments = null;
 
-    #[ORM\Column(type: Types::BOOLEAN, nullable: false)]
-    private bool $online;
-
     #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $replyTo = null;
 
@@ -144,25 +141,6 @@ class Mail implements TranslatableInterface
     public function setAttachments(?string $attachments): self
     {
         $this->attachments = $attachments;
-
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isOnline(): bool
-    {
-        return $this->online;
-    }
-
-    /**
-     * @param bool $online
-     * @return Mail
-     */
-    public function setOnline(bool $online): Mail
-    {
-        $this->online = $online;
 
         return $this;
     }

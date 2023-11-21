@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace WebEtDesign\MailerBundle\Attribute;
 
@@ -10,6 +11,9 @@ class MailEvent
     public function __construct(
         public string $name,
         public string $label,
-        public int $priority = 0
-    ) {}
+        public bool   $spool = false,
+        public int    $priority = 0
+    )
+    {
+    }
 }

@@ -14,6 +14,11 @@ class MailEventManager
         return $this->events;
     }
 
+    public function getConfig(string $name)
+    {
+        return $this->events[$name] ?? null;
+    }
+
     /**
      * @param array $events
      * @return MailEventManager
@@ -27,14 +32,16 @@ class MailEventManager
     /**
      * @param $name
      * @param $label
+     * @param $spool
      * @param $class
      * @return MailEventManager
      */
-    public function addEvent ($name, $label, $class): MailEventManager
+    public function addEvent ($name, $label, $spool, $class): MailEventManager
     {
         if (!array_key_exists($name, $this->events)){
             $this->events[$name] = [
                 'label' => $label,
+                'spool' => $spool,
                 'class' => $class
             ];
         }

@@ -6,6 +6,9 @@ use Symfony\Component\HttpFoundation\File\File;
 interface MailEventInterface
 {
     public function getEmail(): string;
+    public function getLocale(): ?string;
+    public function setLocale(string $locale): self;
+
 
     /**
      * @return File[]|File|null

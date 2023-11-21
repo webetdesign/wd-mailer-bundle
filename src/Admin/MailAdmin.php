@@ -112,11 +112,6 @@ final class MailAdmin extends AbstractAdmin
                 'label' => 'Évènement',
                 'choices' => $this->getMailEventsChoices()
             ])
-//            ->add('online', CheckboxType::class, [
-//                'help'     => 'Permets d’enregistrer les mails pour le visualiser en ligne. ' .
-//                    'Ajouter dans le template HTML un lien avec comme href : {{ ONLINE_LINK }}',
-//                'required' => false,
-//            ])
             ->end();
 
         $formMapper
