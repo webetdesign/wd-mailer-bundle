@@ -27,6 +27,7 @@ class WDMailerBundle extends AbstractBundle
 
         $container->parameters()->set('wd_mailer.spool.batch_size', $config['spool']['batch_size']);
         $container->parameters()->set('wd_mailer.spool.batch_interval_second', $config['spool']['batch_interval_second']);
+        $container->parameters()->set('wd_mailer.auto_configure_events', $config['auto_configure_events']);
 
         $bundles = $builder->getParameter('kernel.bundles');
         if (isset($bundles['SonataAdminBundle'])) {
@@ -57,6 +58,17 @@ class WDMailerBundle extends AbstractBundle
             ->scalarNode('default_locale')->isRequired()->end()
                 ->arrayNode('locales')
                 ->scalarPrototype()->isRequired()->end()
+            ->end()
+            ->arrayNode('auto_configure_events')
+                ->useAttributeAsKey('event')
+                ->arrayPrototype()->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('from')->isRequired()->end()
+                        ->scalarNode('from_name')->defaultNull()->end()
+                        ->scalarNode('to')->isRequired()->end()
+                        ->scalarNode('reply_to')->defaultNull()->end()
+                    ->end()
+                ->end()
             ->end()
         ;
     }

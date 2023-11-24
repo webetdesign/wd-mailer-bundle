@@ -26,23 +26,25 @@ class MailEventManager
     public function setEvents(array $events): MailEventManager
     {
         $this->events = $events;
+
         return $this;
     }
 
     /**
-     * @param $name
-     * @param $label
-     * @param $spool
      * @param $class
+     * @param $config
      * @return MailEventManager
      */
-    public function addEvent ($name, $label, $spool, $class): MailEventManager
+    public function addEvent($class, $config): MailEventManager
     {
-        if (!array_key_exists($name, $this->events)){
-            $this->events[$name] = [
-                'label' => $label,
-                'spool' => $spool,
-                'class' => $class
+        if (!array_key_exists($config['name'], $this->events)) {
+            $this->events[$config['name']] = [
+                'class'   => $class,
+                'label'   => $config['label'],
+                'spool'   => $config['spool'],
+                'subject' => $config['subject'],
+                'html'    => $config['templateHtml'],
+                'text'    => $config['templateText'],
             ];
         }
 

@@ -50,7 +50,7 @@ class MailTranslation implements TranslationInterface
      */
     public function setTitle(?string $title = null): MailTranslation
     {
-        $this->title = $title ? $title : 'trans_'.$this->getTranslatable()->getName();
+        $this->title = $title;
         return $this;
     }
 

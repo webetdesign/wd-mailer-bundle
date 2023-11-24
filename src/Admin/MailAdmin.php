@@ -18,9 +18,9 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use WebEtDesign\MailerBundle\Entity\Mail;
-use WebEtDesign\MailerBundle\Entity\MailTranslation;
 use WebEtDesign\MailerBundle\Form\Admin\MailContentsTranslationType;
 use WebEtDesign\MailerBundle\Services\MailEventManager;
+use WebEtDesign\MailerBundle\Services\MailHelper;
 use WebEtDesign\MailerBundle\Util\ObjectConverter;
 
 final class MailAdmin extends AbstractAdmin
@@ -31,6 +31,7 @@ final class MailAdmin extends AbstractAdmin
         private readonly ParameterBagInterface $parameterBag,
         private readonly MailEventManager      $mailEventManager,
         private readonly Security              $security,
+        private readonly MailHelper            $mailHelper,
     )
     {
         $this->mailEvents = $this->mailEventManager->getEvents();
@@ -112,19 +113,14 @@ final class MailAdmin extends AbstractAdmin
 
         /** @var Mail $subject */
         $subject        = $this->getSubject();
-        $define_locales = array_map(fn($item) => $item->getLocale(), $subject->getTranslations()->toArray());
-        foreach ($locales as $l) {
-            if (!in_array($l, $define_locales)) {
-                $trans = new MailTranslation();
-                $trans->setLocale($l);
-                $trans->setContentHtml("{% extends 'email/base.html.twig' %}");
-                $subject->addTranslation($trans);
-            }
-        }
 
-        if ($subject && $subject->getEvent()) {
+        if ($subject->getEvent()) {
             $event       = $this->getMailEvents()[$subject->getEvent()]['class'] ?? null;
             $eventParams = ObjectConverter::getAvailableMethods($event);
+        }
+
+        if (!empty($subject->getEvent())) {
+            $this->mailHelper->initTranslationObjects($subject);
         }
 
         if (empty($subject->getId()) || empty($subject->getEvent())) {

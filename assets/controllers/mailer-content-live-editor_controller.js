@@ -26,6 +26,8 @@ export default class extends Controller {
 
     const root = createRoot(this.editorTarget);
     root.render(<App value={this.valueValue} onChange={value => this.handleChanges(value)}/>);
+
+    this.updatePreview();
   }
 
   handleChanges(value) {
