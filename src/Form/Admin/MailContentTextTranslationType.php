@@ -13,7 +13,7 @@ class MailContentTextTranslationType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('contentTxt', AceTwigEditorType::class, [
+            ->add('contentTxt', TplLiveEditorType::class, [
                 'label' => false,
                 //                'width'  => '100%',
                 //                'height' => '1000px',

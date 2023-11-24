@@ -42,9 +42,6 @@ class Mail implements TranslatableInterface
     #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $fromName = null;
 
-    #[ORM\Column(name: 'attachments', type: Types::STRING, nullable: true)]
-    private ?string $attachments = null;
-
     #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $replyTo = null;
 
@@ -74,15 +71,6 @@ class Mail implements TranslatableInterface
         $emails = explode(',', $emails);
 
         return array_values(array_filter($emails, static fn($value) => !is_null($value) && $value !== ''));
-    }
-
-    public function getAttachementsAsArray(): array
-    {
-        $attachements = preg_replace('/[\s\r\n]/', ',', $this->getAttachments());
-
-        $attachements = explode(',', $attachements);
-
-        return array_values(array_filter($attachements, static fn($value) => !is_null($value) && $value !== ''));
     }
 
     public function getName(): string
@@ -131,62 +119,6 @@ class Mail implements TranslatableInterface
         $this->from = $from;
 
         return $this;
-    }
-
-    public function getAttachments(): ?string
-    {
-        return $this->attachments;
-    }
-
-    public function setAttachments(?string $attachments): self
-    {
-        $this->attachments = $attachments;
-
-        return $this;
-    }
-
-    // Getter and setter for split input in few tabs in admin form
-
-    public function getTranslationsTitle(): ArrayCollection|Collection
-    {
-        return $this->getTranslations();
-    }
-
-    public function getTranslationsContentHtml(): ArrayCollection|Collection
-    {
-        return $this->getTranslations();
-    }
-
-    public function getTranslationsContentText(): ArrayCollection|Collection
-    {
-        return $this->getTranslations();
-    }
-
-    public function setTranslationsTitle(iterable $translations): void
-    {
-        $this->ensureIsIterableOrCollection($translations);
-
-        foreach ($translations as $translation) {
-            $this->addTranslation($translation);
-        }
-    }
-
-    public function setTranslationsContentHtml(iterable $translations): void
-    {
-        $this->ensureIsIterableOrCollection($translations);
-
-        foreach ($translations as $translation) {
-            $this->addTranslation($translation);
-        }
-    }
-
-    public function setTranslationsContentText(iterable $translations): void
-    {
-        $this->ensureIsIterableOrCollection($translations);
-
-        foreach ($translations as $translation) {
-            $this->addTranslation($translation);
-        }
     }
 
     /**

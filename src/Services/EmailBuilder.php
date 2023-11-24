@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace WebEtDesign\MailerBundle\Services;
 
 use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
@@ -15,7 +16,10 @@ use WebEtDesign\MailerBundle\Exception\MailTransportException;
 
 class EmailBuilder
 {
-    public function __construct(private Environment $twig)
+    public function __construct(
+        private Environment     $twig,
+        private LoggerInterface $wdMailerLogger,
+    )
     {
     }
 
@@ -35,7 +39,7 @@ class EmailBuilder
             $email->replyTo(new Address(!empty($mail->getReplyTo()) ? $mail->getReplyTo() : $event->getReplyTo()));
         }
 
-        foreach ($this->getAttachments($mail, $values) as $attachment) {
+        foreach ($event->getAttachements() as $attachment) {
             if ($attachment instanceof UploadedFile) {
                 $email->attachFromPath($attachment->getRealPath(), $attachment->getClientOriginalName());
             } else {
@@ -46,18 +50,22 @@ class EmailBuilder
         return $email;
     }
 
-    public function emailHtml(Mail $mail, array $values, string $locale): ?string
+    public function emailHtml(Mail $mail, array $values, string $locale, bool $preview = false): ?string
     {
         if (empty($mail->translate($locale)->getContentHtml())) {
             return null;
         }
 
-        $tpl = $this->twig->createTemplate($mail->getContentHtml());
+        if ($preview) {
+            $this->twig->disableStrictVariables();
+        }
+
+        $tpl = $this->twig->createTemplate($mail->translate($locale)->getContentHtml());
 
         try {
             $content = $tpl->render($values);
         } catch (Exception $error) {
-            $this->mailerLogger->error('WD_MAILER', (array)$error);
+            $this->wdMailerLogger->error('WD_MAILER', (array)$error);
 
             return null;
         }
@@ -65,64 +73,27 @@ class EmailBuilder
         return $content;
     }
 
-    public function emailText(Mail $mail, array $values, string $locale): ?string
+    public function emailText(Mail $mail, array $values, string $locale, bool $preview = false): ?string
     {
         if (empty($mail->translate($locale)->getContentTxt())) {
             return null;
         }
 
-        $tpl = $this->twig->createTemplate($mail->getContentTxt());
+        if ($preview) {
+            $this->twig->disableStrictVariables();
+        }
+
+        $tpl = $this->twig->createTemplate($mail->translate($locale)->getContentTxt());
 
         try {
             $content = $tpl->render($values);
         } catch (Exception $error) {
-            $this->mailerLogger->error('WD_MAILER', (array)$error);
+            $this->wdMailerLogger->error('WD_MAILER', (array)$error);
 
             return null;
         }
 
         return $content;
-    }
-
-    /**
-     * @param Mail $mail
-     * @param $values
-     * @return array
-     */
-    private function getAttachments(Mail $mail, $values): array
-    {
-        $attachments = $mail->getAttachementsAsArray();
-
-        $attachments = !is_array($attachments) ? [$attachments] : $attachments;
-        foreach ($attachments as $k => $item) {
-            if (!preg_match('/^__(.*)__$/', $item, $matches)) {
-                continue;
-            }
-
-            unset($attachments[$k]);
-
-            $split      = explode('.', $matches[1]);
-            $attachment = $values[array_shift($split)] ?? [];
-
-            foreach ($split as $slip_item) {
-                $method = 'get' . ucfirst($slip_item);
-                if (!method_exists($attachment, $method)) {
-                    $attachment = null;
-                    break;
-                }
-                $attachment = $attachment->$method();
-            }
-
-            if ($attachment) {
-                if (is_array($attachment)) {
-                    $attachments = [...$attachments, ...$attachment];
-                } else {
-                    $attachments[] = $attachment;
-                }
-            }
-        }
-
-        return $attachments;
     }
 
     /**
@@ -148,9 +119,8 @@ class EmailBuilder
             $split = explode('.', $matches[1]);
             $dest  = $values[array_shift($split)] ?? [];
 
-
             foreach ($split as $split_item) {
-                $method = 'get'.ucfirst($split_item);
+                $method = 'get' . ucfirst($split_item);
                 if (!method_exists($dest, $method)) {
                     $dest = null;
                     break;
@@ -167,7 +137,7 @@ class EmailBuilder
             }
         }
 
-        return array_map(fn ($item) => new Address($item), $to);
+        return array_map(fn($item) => new Address($item), $to);
     }
 
     private function parseAndReplaceTitleVars($title, $values): string

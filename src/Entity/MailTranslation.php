@@ -19,7 +19,7 @@ class MailTranslation implements TranslationInterface
     #[ORM\GeneratedValue(strategy: 'AUTO')]
     private ?int $id = null;
 
-    #[ORM\Column(name: "title", type: Types::STRING, nullable: false)]
+    #[ORM\Column(name: "title", type: Types::STRING, nullable: true)]
     private ?string $title = null;
 
     #[ORM\Column(name: "content_html", type: Types::TEXT, nullable: true)]

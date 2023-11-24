@@ -13,14 +13,13 @@ use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Route\RouteCollectionInterface;
 use Sonata\AdminBundle\Show\ShowMapper;
+use Sonata\AdminBundle\Translator\UnderscoreLabelTranslatorStrategy;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use WebEtDesign\MailerBundle\Entity\Mail;
-use WebEtDesign\MailerBundle\Form\Admin\MailContentHtmlTranslationType;
-use WebEtDesign\MailerBundle\Form\Admin\MailContentTextTranslationType;
-use WebEtDesign\MailerBundle\Form\Admin\MailTitleTranslationType;
-use WebEtDesign\MailerBundle\Form\TplParametersType;
+use WebEtDesign\MailerBundle\Entity\MailTranslation;
+use WebEtDesign\MailerBundle\Form\Admin\MailContentsTranslationType;
 use WebEtDesign\MailerBundle\Services\MailEventManager;
 use WebEtDesign\MailerBundle\Util\ObjectConverter;
 
@@ -31,31 +30,39 @@ final class MailAdmin extends AbstractAdmin
     public function __construct(
         private readonly ParameterBagInterface $parameterBag,
         private readonly MailEventManager      $mailEventManager,
+        private readonly Security              $security,
     )
     {
         $this->mailEvents = $this->mailEventManager->getEvents();
         parent::__construct();
     }
 
+    protected function configure(): void
+    {
+        $this->setTranslationDomain('wd_mailer');
+        $this->setLabelTranslatorStrategy(new UnderscoreLabelTranslatorStrategy());
+    }
+
     protected function configureRoutes(RouteCollectionInterface $collection): void
     {
         $collection->add('test', 'test/{id}');
+        $collection->add('live_preview', '{id}/live_preview/{mode}/{locale}');
     }
 
     /**
      * @inheritDoc
      */
-    protected function configureActionButtons(array $list, string $action, ?object $object = null): array
+    protected function configureActionButtons(array $buttonList, string $action, ?object $object = null): array
     {
         if (in_array($action, ['show', 'edit'], true)
             && $this->hasRoute('test')
         ) {
-            $list['test'] = [
+            $buttonList['test'] = [
                 'template' => $this->getTemplateRegistry()->getTemplate('button_test'),
             ];
         }
 
-        return $list;
+        return $buttonList;
     }
 
     protected function configureDatagridFilters(DatagridMapper $datagridMapper): void
@@ -88,103 +95,83 @@ final class MailAdmin extends AbstractAdmin
             ]);
     }
 
+    protected function alterNewInstance(object $object): void
+    {
+        $locales = $this->parameterBag->get('wd_mailer.locales');
+    }
+
     protected function configureFormFields(FormMapper $formMapper): void
     {
         $locales = $this->parameterBag->get('wd_mailer.locales');
         $locale  = $this->parameterBag->get('wd_mailer.default_locale');
 
         $this->setFormTheme(array_merge($this->getFormTheme(), [
-            '@WDMailer/admin/form/form_layout.html.twig'
+            '@WDMailer/admin/form/form_layout.html.twig',
+            '@WDMailer/admin/form/mail_admin_contents_layout.html.twig',
         ]));
 
         /** @var Mail $subject */
-        $subject = $this->getSubject();
+        $subject        = $this->getSubject();
+        $define_locales = array_map(fn($item) => $item->getLocale(), $subject->getTranslations()->toArray());
+        foreach ($locales as $l) {
+            if (!in_array($l, $define_locales)) {
+                $trans = new MailTranslation();
+                $trans->setLocale($l);
+                $trans->setContentHtml("{% extends 'email/base.html.twig' %}");
+                $subject->addTranslation($trans);
+            }
+        }
+
         if ($subject && $subject->getEvent()) {
             $event       = $this->getMailEvents()[$subject->getEvent()]['class'] ?? null;
             $eventParams = ObjectConverter::getAvailableMethods($event);
         }
 
-        $formMapper
-            ->tab('Général')
-            ->with('#', ['class' => 'col-md-6', 'box_class' => 'header_none'])
-            ->add('name')
-            ->add('event', ChoiceType::class, [
-                'label' => 'Évènement',
-                'choices' => $this->getMailEventsChoices()
-            ])
-            ->end();
-
-        $formMapper
-            ->with('', ['class' => 'col-md-6', 'box_class' => 'header_none'])
-            ->add('from', null, ['label' => 'Courriel de l\'émetteur', 'row_attr' => ['class' => 'col-md-6', 'style' => 'padding-left: 0px;']])
-            ->add('fromName', null, ['label' => 'Nom de l\'émetteur', 'row_attr' => ['class' => 'col-md-6', 'style' => 'padding-right: 0px;']])
-            ->add('replyTo', null, ['label' => 'Répondre à'])
-            ->add('to', null, [
-                'label' => 'Destinataire(s)',
-                'help'  => 'Un ou plusieurs emails séparés par des virgules ou des retours ligne. ' .
-                    'Les variables sont également acceptées sous cette syntaxe : __email__',
-            ])
-            ->add('attachments', null, [
-                'required' => false,
-                'label'    => 'Fichiers joints',
-                'help'     => 'Les variables de type fichier acceptées sous cette syntaxe : __fichier__',
-            ]);
-
-        $formMapper
-            //            ->add('title', null, ['label' => 'Objet'])
-            ->add('translationsTitle', TranslationsFormsType::class, [
-                'label'            => false,
-                'locales'          => $locales,
-                'default_locale'   => [$locale],
-                'required_locales' => [$locale],
-                'form_type'        => MailTitleTranslationType::class
-
-            ])
-            ->end()
-            ->end();
-
-        if ($subject->getId()) {
+        if (empty($subject->getId()) || empty($subject->getEvent())) {
             $formMapper
-                ->tab('Contenu HTML')
-                ->with('HTML',
-                    ['class' => 'col-md-8', 'box_class' => 'header_none'])
-                ->add('translationsContentHtml', TranslationsFormsType::class, [
-                    'label'          => false,
-                    'locales'        => $locales,
-                    'default_locale' => [$locale],
-                    'form_type'      => MailContentHtmlTranslationType::class
+                ->tab('config')
+                ->with('#', ['class' => 'col-md-6', 'box_class' => 'header_none'])
+                ->add('event', ChoiceType::class, [
+                    'label'   => 'Évènement',
+                    'choices' => $this->getMailEventsChoices()
                 ])
-                ->end()
-                ->with('Paramètres',
-                    ['class' => 'col-md-4', 'box_class' => 'box box-primary box-no-header'])
-                ->add('paramsHtml', TplParametersType::class, [
-                    'mapped' => false,
-                    'label'  => false,
-                    'params' => $eventParams ?? [],
+                ->end();
+        } else {
+            $formMapper
+                ->tab('config')
+                ->with('1', ['class' => 'col-md-6', 'box_class' => 'header_none']);
+
+            if ($this->security->isGranted('ROLE_ADMIN_CMS')) {
+                $formMapper->add('event', null, [
+                    'label'    => 'Évènement',
+                    'disabled' => 'disabled',
+                ]);
+            }
+
+            $formMapper
+                ->add('from', null, ['label' => 'Courriel de l\'émetteur', 'row_attr' => ['class' => 'col-md-6', 'style' => 'padding-left: 0px;']])
+                ->add('fromName', null, ['label' => 'Nom de l\'émetteur', 'row_attr' => ['class' => 'col-md-6', 'style' => 'padding-right: 0px;']])
+                ->add('replyTo', null, ['label' => 'Répondre à'])
+                ->add('to', null, [
+                    'label' => 'Destinataire(s)',
+                    'help'  => 'Un ou plusieurs emails séparés par des virgules ou des retours ligne. ' .
+                        'Les variables sont également acceptées sous cette syntaxe : __email__',
                 ])
                 ->end()
                 ->end();
 
             $formMapper
-                ->tab('Version texte')
-                ->with('', ['class' => 'col-md-8', 'box_class' => 'header_none'])
-                ->add('translationsContentText', TranslationsFormsType::class, [
-                    'label'          => false,
-                    'locales'        => $locales,
-                    'default_locale' => [$locale],
-                    'form_type'      => MailContentTextTranslationType::class
+                ->tab('content')
+                ->with('Contenu', ['class' => 'col-md-12', 'box_class' => 'header_none'])
+                ->add('translations', TranslationsFormsType::class, [
+                    'label'            => false,
+                    'locales'          => $locales,
+                    'default_locale'   => [$locale],
+                    'required_locales' => [$locale],
+                    'form_type'        => MailContentsTranslationType::class
                 ])
                 ->end()
-                ->with('Paramètres',
-                    ['class' => 'col-md-4', 'box_class' => 'box box-primary box-no-header'])
-                ->add('paramsTxt', TplParametersType::class, [
-                    'mapped' => false,
-                    'label'  => false,
-                    'params' => $eventParams ?? [],
-                ])
-                ->end()
-                ->end()//
-            ;
+                ->end();
         }
     }
 
