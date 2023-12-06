@@ -79,19 +79,19 @@ final class MailAdmin extends AbstractAdmin
     protected function configureListFields(ListMapper $listMapper): void
     {
         $listMapper
-            ->add('id')
             ->add('name')
             ->add('event')
             ->add('to')
             ->add('from')
+            ->add('fromName')
             ->add(ListMapper::NAME_ACTIONS, null, [
                 'actions' => [
                     //                    'show'   => [],
                     'edit'   => [],
                     'delete' => [],
-                    'test'   => [
-                        'template' => '@WDMailer/admin/mail/list__action_test.html.twig',
-                    ],
+//                    'test'   => [
+//                        'template' => '@WDMailer/admin/mail/list__action_test.html.twig',
+//                    ],
                 ],
             ]);
     }

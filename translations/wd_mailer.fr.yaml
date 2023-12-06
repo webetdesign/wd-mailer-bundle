@@ -2,3 +2,11 @@ breadcrumb.link_mail_list: Emails
 
 form.group_config: Configuration
 form.group_content: Contenu
+
+list.label_id: Identifiant
+list.label_name: Nom
+list.label_event: Code de l'evément
+list.label_to: Déstinataire(s)
+list.label_from: Email de l'éméteur
+list.label_from_name: Nom de l'éméteur
+list.label__actions: Actions

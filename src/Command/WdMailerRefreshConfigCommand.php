@@ -11,9 +11,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use WebEtDesign\MailerBundle\Doctrine\MailManager;
 use WebEtDesign\MailerBundle\Doctrine\MailRepository;
-use WebEtDesign\MailerBundle\Entity\Mail;
 use WebEtDesign\MailerBundle\Services\MailEventManager;
 use WebEtDesign\MailerBundle\Services\MailHelper;
 
@@ -24,10 +22,10 @@ use WebEtDesign\MailerBundle\Services\MailHelper;
 class WdMailerRefreshConfigCommand extends Command
 {
     public function __construct(
-        private MailEventManager $mailEventManager,
-        private MailRepository $mailRepository,
-        private MailHelper $mailHelper,
-        private EntityManagerInterface $em,
+        private readonly MailEventManager       $mailEventManager,
+        private readonly MailRepository         $mailRepository,
+        private readonly MailHelper             $mailHelper,
+        private readonly EntityManagerInterface $em,
     )
     {
         parent::__construct();

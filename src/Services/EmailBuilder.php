@@ -14,7 +14,7 @@ use WebEtDesign\MailerBundle\Entity\Mail;
 use WebEtDesign\MailerBundle\Event\MailEventInterface;
 use WebEtDesign\MailerBundle\Exception\MailTransportException;
 
-class EmailBuilder
+readonly class EmailBuilder
 {
     public function __construct(
         private Environment     $twig,

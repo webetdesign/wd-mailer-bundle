@@ -11,7 +11,7 @@ use WebEtDesign\MailerBundle\Entity\Mail;
 use WebEtDesign\MailerBundle\Services\MailEventManager;
 
 #[AutoconfigureTag(name: 'doctrine.event_subscriber')]
-class MailSubscriber implements EventSubscriber
+readonly class MailSubscriber implements EventSubscriber
 {
 
     public function __construct(private MailEventManager $manager)
