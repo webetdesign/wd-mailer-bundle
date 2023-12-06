@@ -27,7 +27,7 @@ class EmailBuilder
     {
         $email = new Email();
         $email->subject($this->parseAndReplaceTitleVars($mail->translate($locale)->getTitle(), $event))
-            ->from(new Address($mail->getFrom(), $mail->getFromName()))
+            ->from(new Address($mail->getFrom(), $mail->getFromName() ?: ''))
             ->html($this->emailHtml($mail, $values, $locale))
             ->text($this->emailText($mail, $values, $locale));
 
