@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 
 namespace WebEtDesign\MailerBundle\Entity;
 
@@ -9,7 +9,7 @@ use Knp\DoctrineBehaviors\Contract\Entity\TranslationInterface;
 use Knp\DoctrineBehaviors\Model\Translatable\TranslationTrait;
 
 #[ORM\Entity]
-#[ORM\Table(name: "mailer__mail_translation")]
+#[ORM\Table(name: 'mailer__mail_translation')]
 class MailTranslation implements TranslationInterface
 {
     use TranslationTrait;
@@ -19,13 +19,13 @@ class MailTranslation implements TranslationInterface
     #[ORM\GeneratedValue(strategy: 'AUTO')]
     private ?int $id = null;
 
-    #[ORM\Column(name: "title", type: Types::STRING, nullable: false)]
+    #[ORM\Column(name: 'title', type: Types::STRING, nullable: true)]
     private ?string $title = null;
 
-    #[ORM\Column(name: "content_html", type: Types::TEXT, nullable: true)]
+    #[ORM\Column(name: 'content_html', type: Types::TEXT, nullable: true)]
     private ?string $contentHtml = null;
 
-    #[ORM\Column(name: "content_txt", type: Types::TEXT, nullable: true)]
+    #[ORM\Column(name: 'content_txt', type: Types::TEXT, nullable: true)]
     private ?string $contentTxt = null;
 
     /**
@@ -50,7 +50,7 @@ class MailTranslation implements TranslationInterface
      */
     public function setTitle(?string $title = null): MailTranslation
     {
-        $this->title = $title ? $title : 'trans_'.$this->getTranslatable()->getName();
+        $this->title = $title;
         return $this;
     }
 

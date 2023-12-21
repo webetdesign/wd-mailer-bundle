@@ -1,30 +1,47 @@
 {% block wd_mailer_tpl_params_widget %}
     <table class="table">
         <thead>
-        <tr>
-            <th>Valeur</th>
-            <th>Type de retour</th>
-        </tr>
+            <tr>
+                <th>Valeur</th>
+                <th>Type de retour</th>
+            </tr>
         </thead>
         <tbody>
-        {% for name, return in params %}
-            <tr>
-                <td>{{ name }}</td>
-                <td>{{ return }}</td>
-            </tr>
-        {% endfor %}
+            {% for name, return in params %}
+                <tr>
+                    <td>{{ name }}</td>
+                    <td>{{ return }}</td>
+                </tr>
+            {% endfor %}
         </tbody>
     </table>
 {% endblock %}
 
-{% block wd_mailer_twig_ace_editor_widget %}
-    <div data-controller="mailer-ace-editor">
-        {{ form_widget(form, {attr: {
-            'data-mailer-ace-editor-target': 'input',
-            'style': 'display: none'
-        }}) }}
-        <div data-mailer-ace-editor-target="editor" style="width: 100%; aspect-ratio: 16/10">
-            {{- form.vars.value -}}
+{% block wd_mailer_twig_live_editor_widget %}
+    {% if form.parent.vars.value is not null %}
+        {% set liveUri = path('admin_webetdesign_mailer_mail_live_preview', {id: form.parent.vars.value.translatable.id, mode: mode, locale: form.parent.vars.value.locale}) %}
+
+        <div {{ stimulus_controller('mailer-content-live-editor', {
+            value: form.vars.value,
+            liveUri: liveUri,
+        }) }}>
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form_widget(form, {attr: {
+                        'data-mailer-content-live-editor-target': 'input',
+                        'style': 'display: none'
+                    }}) }}
+                    <div {{ stimulus_target('mailer-content-live-editor', 'editor') }}>
+                        {{- form.vars.value -}}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <iframe style="width: 100%; aspect-ratio: 4/3" {{ stimulus_target('mailer-content-live-editor', 'iframe') }}
+                            src="{{ liveUri }}" frameborder="0">
+                    </iframe>
+                </div>
+            </div>
         </div>
-    </div>
+    {% endif %}
 {% endblock %}

@@ -1,0 +1,26 @@
+{% block mail_admin_contents_widget %}
+    {{ form_row(form.title) }}
+    {{ form_row(form.contentHtml) }}
+
+    {% set collaps_id = 'collapse_' ~ form.vars.id %}
+    <div class="box box-default">
+        <div class="box-header with-border">
+            <h3 class="box-title">Version texte (facultatif) </h3>
+            <div class="pull-right">
+                <button type="button" class="btn btn-default"
+                        data-toggle="collapse"
+                        data-target="#{{ collaps_id }}"
+                        aria-controls="{{ collaps_id }}"
+                        aria-expanded="false"
+                ><i class="fa fa-arrow-down"></i>
+                </button>
+            </div>
+
+        </div>
+
+        <div class="box-body collapse" id="{{ collaps_id }}">
+            {{ form_row(form.contentTxt) }}
+        </div>
+    </div>
+
+{% endblock %}
