@@ -16,7 +16,7 @@ class MailContentsTranslationType extends AbstractType
     {
         $constraints = [];
 
-        if ($options['required']){
+        if ($options['required']) {
             $constraints = [
                 new NotBlank(),
             ];
@@ -33,13 +33,14 @@ class MailContentsTranslationType extends AbstractType
         $builder
             ->add('contentHtml', TplLiveEditorType::class, [
                 'label' => false,
-                'mode' => 'html',
+                'mode'  => 'html',
             ]);
 
         $builder
             ->add('contentTxt', TplLiveEditorType::class, [
-                'label' => false,
-                'mode' => 'text',
+                'label'    => false,
+                'required' => false,
+                'mode'     => 'text',
             ]);
     }
 
