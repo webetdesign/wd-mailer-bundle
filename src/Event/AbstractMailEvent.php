@@ -10,7 +10,7 @@ abstract class AbstractMailEvent extends Event implements MailEventInterface
 {
     private ?string $locale = null;
 
-    private ?array $attachements = null;
+    private ?array $attachements = [];
 
     private ?string $replyTo = null;
 
