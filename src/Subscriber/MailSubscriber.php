@@ -34,6 +34,6 @@ readonly class MailSubscriber implements EventSubscriber
         }
 
         $config = $this->manager->getConfig($entity->getEvent());
-        $entity->setName($config['label']);
+        $entity->setName($config->label);
     }
 }

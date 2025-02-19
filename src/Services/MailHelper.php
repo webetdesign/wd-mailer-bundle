@@ -31,10 +31,10 @@ readonly class MailHelper
             $config = $this->mailEventManager->getConfig($mail->getEvent());
             foreach ($locales as $l) {
                 if (!in_array($l, $define_locales) || $override) {
-                    $subject = !empty($config['subject']) ? is_string($config['subject']) ? $config['subject'] : $config['subject'][$l] ?? null : null;
+                    $subject = !empty($config->subject) ? is_string($config->subject) ? $config->subject : $config->subject[$l] ?? null : null;
 
-                    $html = $this->getTemplate($config['html'], $l);
-                    $text = $this->getTemplate($config['text'], $l);
+                    $html = $this->getTemplate($config->templateHtml, $l);
+                    $text = $this->getTemplate($config->templateText, $l);
 
                     $trans = $mail->getTranslations()->toArray()[$l] ?? null;
                     if (!$override || !$trans) {

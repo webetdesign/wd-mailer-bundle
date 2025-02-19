@@ -2,14 +2,12 @@
 
 namespace WebEtDesign\MailerBundle\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
 use Knp\DoctrineBehaviors\Model\Translatable\TranslatableTrait;
-use Nette\Utils\Type;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use WebEtDesign\MailerBundle\Enum\CategoryEnum;
 
 /**
  * @method string getTitle()
@@ -44,6 +42,9 @@ class Mail implements TranslatableInterface
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $replyTo = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?CategoryEnum $category = CategoryEnum::TRANSACTIONAL_EMAIL;
 
     public function __toString()
     {
@@ -155,6 +156,18 @@ class Mail implements TranslatableInterface
     public function setReplyTo(?string $replyTo): Mail
     {
         $this->replyTo = $replyTo;
+
+        return $this;
+    }
+
+    public function getCategory(): ?CategoryEnum
+    {
+        return $this->category;
+    }
+
+    public function setCategory(?CategoryEnum $category): Mail
+    {
+        $this->category = $category;
 
         return $this;
     }

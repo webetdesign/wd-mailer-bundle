@@ -5,12 +5,13 @@ namespace WebEtDesign\MailerBundle\EventListener;
 
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use ReflectionException;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\EventDispatcher\Event;
+use WebEtDesign\MailerBundle\Entity\Mail;
 use WebEtDesign\MailerBundle\Event\MailEventInterface;
 use WebEtDesign\MailerBundle\Exception\MailTransportException;
 use WebEtDesign\MailerBundle\Messenger\Message\EmailMessage;
@@ -19,7 +20,6 @@ use WebEtDesign\MailerBundle\Services\EmailBuilder;
 use WebEtDesign\MailerBundle\Services\MailEventManager;
 use WebEtDesign\MailerBundle\Services\SymfonyMailerTransport;
 use WebEtDesign\MailerBundle\Util\ObjectConverter;
-use WebEtDesign\MailerBundle\Entity\Mail;
 
 readonly class MailerListener
 {
@@ -67,7 +67,7 @@ readonly class MailerListener
         foreach ($adminConfig as $mail) {
             $email = $this->emailBuilder->getEmail($mail, $event, $values, $locale);
 
-            if ($eventConfig['spool']) {
+            if ($eventConfig->spool) {
                 $message = new EmailMessage($email, $event, $name);
                 $this->deferedToMessenger($message);
             } else {

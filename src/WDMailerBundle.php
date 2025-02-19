@@ -40,7 +40,10 @@ class WDMailerBundle extends AbstractBundle
         $builder->registerAttributeForAutoconfiguration(MailEvent::class,
             static function (ChildDefinition $definition, MailEvent $attribute) use ($mailerListener) {
                 $mailerListener->addTag('kernel.event_listener', ['event' => $attribute->name, 'priority' => $attribute->priority]);
-                $definition->addTag('wd_mailer.event', ['event' => json_encode($attribute)]);
+                $definition->addTag('wd_mailer.event', [
+                    'name'      => $attribute->name,
+                    'attribute' => $attribute->toJson()
+                ]);
             }
         );
     }

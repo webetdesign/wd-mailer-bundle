@@ -79,7 +79,7 @@ class WdMailerRefreshConfigCommand extends Command
         $events  = $this->mailEventManager->getEvents();
         $choices = [];
         foreach ($events as $key => $event) {
-            $choices[$key] = $event['label'] ?? $key;
+            $choices[$key] = $event->label ?? $key;
         }
 
         return $choices;

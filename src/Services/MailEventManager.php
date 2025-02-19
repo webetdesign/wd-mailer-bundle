@@ -3,21 +3,28 @@ declare(strict_types=1);
 
 namespace WebEtDesign\MailerBundle\Services;
 
+use WebEtDesign\MailerBundle\Attribute\MailEvent;
+
 class MailEventManager
 {
     private array $events = [];
 
     /**
-     * @return array
+     * @return array<MailEvent>
      */
     public function getEvents(): array
     {
-        return $this->events;
+        return array_map(fn($event) => MailEvent::createFromJson($event['config']), $this->events);
     }
 
-    public function getConfig(string $name)
+    public function getConfig(string $name): ?MailEvent
     {
-        return $this->events[$name] ?? null;
+        return !empty($this->events[$name]) ? MailEvent::createFromJson($this->events[$name]['config']) : null;
+    }
+
+    public function getClass(string $name): ?string
+    {
+        return $this->events[$name]['class'] ?? null;
     }
 
     /**
@@ -33,19 +40,16 @@ class MailEventManager
 
     /**
      * @param $class
+     * @param $name
      * @param $config
      * @return MailEventManager
      */
-    public function addEvent($class, $config): MailEventManager
+    public function addEvent($class, $name, $config): MailEventManager
     {
-        if (!array_key_exists($config['name'], $this->events)) {
-            $this->events[$config['name']] = [
-                'class'   => $class,
-                'label'   => $config['label'],
-                'spool'   => $config['spool'],
-                'subject' => $config['subject'],
-                'html'    => $config['templateHtml'],
-                'text'    => $config['templateText'],
+        if (!array_key_exists($name, $this->events)) {
+            $this->events[$name] = [
+                'class'  => $class,
+                'config' => $config
             ];
         }
 

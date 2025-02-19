@@ -17,7 +17,9 @@ use Sonata\AdminBundle\Translator\UnderscoreLabelTranslatorStrategy;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use WebEtDesign\MailerBundle\Entity\Mail;
+use WebEtDesign\MailerBundle\Enum\CategoryEnum;
 use WebEtDesign\MailerBundle\Form\Admin\MailContentsTranslationType;
 use WebEtDesign\MailerBundle\Services\MailEventManager;
 use WebEtDesign\MailerBundle\Services\MailHelper;
@@ -34,7 +36,6 @@ final class MailAdmin extends AbstractAdmin
         private readonly MailHelper            $mailHelper,
     )
     {
-        $this->mailEvents = $this->mailEventManager->getEvents();
         parent::__construct();
     }
 
@@ -70,6 +71,15 @@ final class MailAdmin extends AbstractAdmin
     {
         $datagridMapper
             ->add('id')
+            ->add('category', null, [
+                'label'         => 'Catégorie',
+                'field_type'    => EnumType::class,
+                'field_options' => [
+                    'class'        => CategoryEnum::class,
+                    'choice_label' => fn($choice) => $choice?->label(),
+                ],
+                'show_filter'   => true,
+            ])
             ->add('name')
             ->add('event')
             ->add('to')
@@ -79,11 +89,15 @@ final class MailAdmin extends AbstractAdmin
     protected function configureListFields(ListMapper $listMapper): void
     {
         $listMapper
-            ->add('name')
-            ->add('event')
-            ->add('to')
-            ->add('from')
-            ->add('fromName')
+            ->add('name');
+
+        if ($this->security->isGranted('ROLE_ADMIN')) {
+            $listMapper
+                ->add('event');
+        }
+        $listMapper
+            ->add('category', null, ['template' => '@WDMailer/admin/mail/list__field_category.html.twig'])
+            ->add('to', null, ['template' => '@WDMailer/admin/mail/list__field_from_to.html.twig'])
             ->add(ListMapper::NAME_ACTIONS, null, [
                 'actions' => [
                     //                    'show'   => [],
@@ -112,10 +126,10 @@ final class MailAdmin extends AbstractAdmin
         ]));
 
         /** @var Mail $subject */
-        $subject        = $this->getSubject();
+        $subject = $this->getSubject();
 
         if ($subject->getEvent()) {
-            $event       = $this->getMailEvents()[$subject->getEvent()]['class'] ?? null;
+            $event = $this->mailEventManager->getClass($subject->getEvent());
             $eventParams = ObjectConverter::getAvailableMethods($event);
         }
 
@@ -136,6 +150,12 @@ final class MailAdmin extends AbstractAdmin
             $formMapper
                 ->tab('config')
                 ->with('1', ['class' => 'col-md-6', 'box_class' => 'header_none']);
+
+            $formMapper->add('category', EnumType::class, [
+                'label'        => 'Catégorie',
+                'class'        => CategoryEnum::class,
+                'choice_label' => fn(CategoryEnum $enum) => $enum->label(),
+            ]);
 
             if ($this->security->isGranted('ROLE_ADMIN_CMS')) {
                 $formMapper->add('event', null, [
@@ -187,7 +207,7 @@ final class MailAdmin extends AbstractAdmin
 
     public function getMailEvents(): array
     {
-        return $this->mailEvents;
+        return $this->mailEventManager->getEvents();
     }
 
     #[Pure] public function getMailEventsChoices(): array

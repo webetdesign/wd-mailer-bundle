@@ -12,6 +12,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use WebEtDesign\MailerBundle\Doctrine\MailManager;
 use WebEtDesign\MailerBundle\Entity\Mail;
+use WebEtDesign\MailerBundle\Enum\CategoryEnum;
 use WebEtDesign\MailerBundle\Services\MailEventManager;
 use WebEtDesign\MailerBundle\Services\MailHelper;
 
@@ -50,8 +51,8 @@ class WdMailerCreateAutoconfigureEventsCommand extends Command
         $configs = $this->parameterBag->get('wd_mailer.auto_configure_events');
 
         foreach ($configs as $event => $config) {
-            $eventConfig = $this->mailEventManager->getConfig($event);
-            if ($eventConfig === null) {
+            $mailEvent = $this->mailEventManager->getConfig($event);
+            if ($mailEvent === null) {
                 $io->error('No configuration found for ' . $event);
                 continue;
             }
@@ -65,7 +66,8 @@ class WdMailerCreateAutoconfigureEventsCommand extends Command
 
             $mail = new Mail();
             $mail->setEvent($event)
-                ->setName($eventConfig['label'])
+                ->setName($mailEvent->label)
+                ->setCategory($mailEvent->category ?? CategoryEnum::TRANSACTIONAL_EMAIL)
                 ->setFrom($config['from'])
                 ->setFromName($config['from_name'])
                 ->setTo($config['to'])

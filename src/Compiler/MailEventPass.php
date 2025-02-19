@@ -15,10 +15,10 @@ class MailEventPass implements CompilerPassInterface
 
         foreach ($container->findTaggedServiceIds('wd_mailer.event') as $class => $tags) {
             foreach ($tags as $tag) {
-                $config = json_decode($tag['event'], true);
                 $eventManager->addMethodCall('addEvent', [
                     $class,
-                    $config
+                    $tag['name'],
+                    $tag['attribute'],
                 ]);
             }
         }

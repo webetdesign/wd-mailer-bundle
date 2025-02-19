@@ -8,11 +8,11 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 abstract class AbstractMailEvent extends Event implements MailEventInterface
 {
-    private ?string $locale = null;
+    protected ?string $locale = null;
 
-    private ?array $attachements = [];
+    protected ?array $attachements = [];
 
-    private ?string $replyTo = null;
+    protected ?string $replyTo = null;
 
     abstract public function getEmail(): string;
 
