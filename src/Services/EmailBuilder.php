@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace WebEtDesign\MailerBundle\Services;
 
-use App\DTO\Core\MailDTO;
+use App\DTO\Core\EmailComposerDTO;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -14,6 +14,7 @@ use Twig\Environment;
 use WebEtDesign\MailerBundle\Entity\Mail;
 use WebEtDesign\MailerBundle\Event\MailEventInterface;
 use WebEtDesign\MailerBundle\Exception\MailTransportException;
+use WebEtDesign\MailerBundle\Util\ObjectConverter;
 
 readonly class EmailBuilder
 {
@@ -57,7 +58,7 @@ readonly class EmailBuilder
 
     protected function getEmailFromDto(Mail $mail, MailEventInterface $event): Email
     {
-        /** @var MailDTO $mailDto */
+        /** @var EmailComposerDTO $mailDto */
         $mailDto = $event->getMailDto();
 
         $email = new Email();
@@ -67,9 +68,13 @@ readonly class EmailBuilder
             ->subject($mailDto->getSubject())
             ->html($mailDto->getBody());
 
-        $email->addTo(new Address($mailDto->getRecipient()));
+        foreach ($mailDto->getRecipient()->getAddresses() as $address) {
+            $email->addTo($address);
+        }
 
-        // TODO CC
+        foreach ($mailDto->getRecipientCC()->getAddresses() as $address) {
+            $email->addCc($address);
+        }
 
         if (!empty($event->getReplyTo()) || !empty($mail->getReplyTo())) {
             $email->replyTo(new Address(!empty($mail->getReplyTo()) ? $mail->getReplyTo() : $event->getReplyTo()));
@@ -199,15 +204,15 @@ readonly class EmailBuilder
         return str_replace(array_keys($vars), array_values($vars), $title);
     }
 
-    public function getEmailDto(Mail $mail, MailEventInterface $event, array $templateParameters): MailDTO
+    public function getEmailDto(Mail $mail, MailEventInterface $event): EmailComposerDTO
     {
         $locale = $event->getLocale() ?? 'fr';
 
-        $dto = new MailDTO();
+        $dto = new EmailComposerDTO();
 
-        $dto->setRecipient($event->getEmail());
+        $values = ObjectConverter::convertToArray($event);
         $dto->setSubject($this->parseAndReplaceTitleVars($mail->translate($locale)->getTitle(), $event));
-        $dto->setBody($this->emailHtml($mail, $templateParameters, $locale));
+        $dto->setBody($this->emailHtml($mail, $values, $locale));
 
         return $dto;
     }
