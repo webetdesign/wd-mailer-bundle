@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace WebEtDesign\MailerBundle\Services;
 
+use App\DTO\Core\MailDTO;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -25,6 +26,10 @@ readonly class EmailBuilder
 
     public function getEmail(Mail $mail, MailEventInterface $event, array $values, string $locale): Email
     {
+        if (method_exists($event, 'getMailDto') && $event->getMailDto() !== null) {
+            return $this->getEmailFromDto($mail, $event);
+        }
+
         $email = new Email();
         $email->subject($this->parseAndReplaceTitleVars($mail->translate($locale)->getTitle(), $event))
             ->from(new Address($mail->getFrom(), $mail->getFromName() ?: ''))
@@ -34,6 +39,37 @@ readonly class EmailBuilder
         foreach ($this->getRecipients($mail, $values) as $recipient) {
             $email->addTo($recipient);
         }
+
+        if (!empty($event->getReplyTo()) || !empty($mail->getReplyTo())) {
+            $email->replyTo(new Address(!empty($mail->getReplyTo()) ? $mail->getReplyTo() : $event->getReplyTo()));
+        }
+
+        foreach ($event->getAttachements() as $attachment) {
+            if ($attachment instanceof UploadedFile) {
+                $email->attachFromPath($attachment->getRealPath(), $attachment->getClientOriginalName());
+            } else {
+                $email->attachFromPath($attachment->getRealPath(), $attachment->getFileName());
+            }
+        }
+
+        return $email;
+    }
+
+    protected function getEmailFromDto(Mail $mail, MailEventInterface $event): Email
+    {
+        /** @var MailDTO $mailDto */
+        $mailDto = $event->getMailDto();
+
+        $email = new Email();
+
+        $email
+            ->from(new Address($mail->getFrom(), $mail->getFromName() ?: ''))
+            ->subject($mailDto->getSubject())
+            ->html($mailDto->getBody());
+
+        $email->addTo(new Address($mailDto->getRecipient()));
+
+        // TODO CC
 
         if (!empty($event->getReplyTo()) || !empty($mail->getReplyTo())) {
             $email->replyTo(new Address(!empty($mail->getReplyTo()) ? $mail->getReplyTo() : $event->getReplyTo()));
@@ -66,6 +102,9 @@ readonly class EmailBuilder
             $content = $tpl->render($values);
         } catch (Exception $error) {
             $this->wdMailerLogger->error('WD_MAILER', (array)$error);
+
+            dump($error);
+            die();
 
             return null;
         }
@@ -158,5 +197,18 @@ readonly class EmailBuilder
         }
 
         return str_replace(array_keys($vars), array_values($vars), $title);
+    }
+
+    public function getEmailDto(Mail $mail, MailEventInterface $event, array $templateParameters): MailDTO
+    {
+        $locale = $event->getLocale() ?? 'fr';
+
+        $dto = new MailDTO();
+
+        $dto->setRecipient($event->getEmail());
+        $dto->setSubject($this->parseAndReplaceTitleVars($mail->translate($locale)->getTitle(), $event));
+        $dto->setBody($this->emailHtml($mail, $templateParameters, $locale));
+
+        return $dto;
     }
 }
