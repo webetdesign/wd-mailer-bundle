@@ -211,6 +211,8 @@ readonly class EmailBuilder
         $dto = new EmailComposerDTO();
 
         $values = ObjectConverter::convertToArray($event);
+
+        $dto->setTemplate($mail->getEvent());
         $dto->setSubject($this->parseAndReplaceTitleVars($mail->translate($locale)->getTitle(), $event));
         $dto->setBody($this->emailHtml($mail, $values, $locale));
 

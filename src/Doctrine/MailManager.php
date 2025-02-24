@@ -3,6 +3,7 @@
 namespace WebEtDesign\MailerBundle\Doctrine;
 
 use WebEtDesign\MailerBundle\Entity\Mail;
+use WebEtDesign\MailerBundle\Enum\CategoryEnum;
 use WebEtDesign\MailerBundle\Model\AbstractMailManager;
 
 class MailManager extends AbstractMailManager
@@ -22,6 +23,13 @@ class MailManager extends AbstractMailManager
     {
         return $this->repository->findBy([
             'event' => $name,
+        ]);
+    }
+
+    public function findByCategory(CategoryEnum $category): array
+    {
+        return $this->repository->findBy([
+            'category' => $category
         ]);
     }
 }
