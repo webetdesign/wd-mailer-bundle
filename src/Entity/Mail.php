@@ -2,8 +2,12 @@
 
 namespace WebEtDesign\MailerBundle\Entity;
 
+use App\Entity\Client\Client;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use DocumentManager\Entity\Document;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
 use Knp\DoctrineBehaviors\Model\Translatable\TranslatableTrait;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -45,6 +49,15 @@ class Mail implements TranslatableInterface
 
     #[ORM\Column(nullable: true)]
     private ?CategoryEnum $category = CategoryEnum::TRANSACTIONAL_EMAIL;
+
+    #[ORM\ManyToMany(targetEntity: Document::class, inversedBy: 'mails')]
+    #[ORM\JoinTable(name: 'mailer__mail_has_document')]
+    private Collection $documents;
+
+    public function __construct()
+    {
+        $this->documents = new ArrayCollection();
+    }
 
     public function __toString()
     {
@@ -168,6 +181,27 @@ class Mail implements TranslatableInterface
     public function setCategory(?CategoryEnum $category): Mail
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    public function getDocuments(): Collection
+    {
+        return $this->documents;
+    }
+
+    public function addDocument(Document $document): self
+    {
+        if (!$this->documents->contains($document)) {
+            $this->documents->add($document);
+        }
+
+        return $this;
+    }
+
+    public function removeDocument(Document $document): self
+    {
+        $this->documents->removeElement($document);
 
         return $this;
     }

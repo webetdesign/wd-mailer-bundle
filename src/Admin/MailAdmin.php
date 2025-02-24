@@ -177,6 +177,16 @@ final class MailAdmin extends AbstractAdmin
                 ->end();
 
             $formMapper
+                ->tab('config')
+                ->with('2', ['class' => 'col-md-6', 'box_class' => 'header_none'])
+                ->add('documents', null, [
+                    'label' => 'Documents',
+                    'by_reference' => false,
+                ])
+                ->end()
+                ->end();
+
+            $formMapper
                 ->tab('content')
                 ->with('Contenu', ['class' => 'col-md-12', 'box_class' => 'header_none'])
                 ->add('translations', TranslationsFormsType::class, [
