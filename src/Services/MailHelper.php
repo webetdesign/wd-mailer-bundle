@@ -62,6 +62,7 @@ readonly class MailHelper
         try {
             $wrapper = $this->twig->load($path);
         } catch (LoaderError|RuntimeError|SyntaxError $e) {
+            // TODO handle exception
             return null;
         }
 
