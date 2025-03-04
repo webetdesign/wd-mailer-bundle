@@ -108,9 +108,6 @@ readonly class EmailBuilder
         } catch (Exception $error) {
             $this->wdMailerLogger->error('WD_MAILER', (array)$error);
 
-            dump($error);
-            die();
-
             return null;
         }
 
