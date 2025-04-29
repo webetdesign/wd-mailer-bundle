@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace WebEtDesign\MailerBundle\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DocumentManager\Repository\DocumentRepository;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -35,6 +36,7 @@ class WdMailerCreateAutoconfigureEventsCommand extends Command
         private readonly ParameterBagInterface  $parameterBag,
         private readonly MailHelper             $mailHelper,
         private readonly EntityManagerInterface $em,
+        private readonly DocumentRepository     $documentRepository,
     )
     {
         parent::__construct();
@@ -78,8 +80,17 @@ class WdMailerCreateAutoconfigureEventsCommand extends Command
             $io->success('New mail configuration was created for ' . $event);
 
             $this->em->persist($mail);
-        }
 
+            foreach ($mailEvent->documents as $model) {
+                $document = $this->documentRepository->findOneBy(['model' => $model]);
+                if ($document === null) {
+                    $io->error(sprintf('[%s] No document found for : %s ', $event, $model));
+                    continue;
+                }
+
+                $mail->addDocument($document);
+            }
+        }
         $this->em->flush();
 
         return Command::SUCCESS;

@@ -12,7 +12,8 @@ class MailEvent
     public function __construct(
         public string            $name,
         public string            $label,
-        public ?CategoryEnum $category = null,
+        public ?CategoryEnum     $category = null,
+        public array             $documents = [],
         public bool              $spool = false,
         public int               $priority = 0,
         public string|array|null $subject = null,
@@ -28,6 +29,7 @@ class MailEvent
             'name'         => $this->name,
             'label'        => $this->label,
             'category'     => $this->category?->value,
+            'documents'    => $this->documents,
             'spool'        => $this->spool,
             'priority'     => $this->priority,
             'subject'      => $this->subject,
@@ -41,14 +43,15 @@ class MailEvent
         $settings = json_decode($json, true);
 
         return new self(
-            $settings['name'],
-            $settings['label'],
-            !empty($settings['category']) ? CategoryEnum::tryFrom($settings['category']) : null,
-            $settings['spool'] ?? false,
-            $settings['priority'] ?? 0,
-            $settings['subject'] ?? null,
-            $settings['templateHtml'] ?? null,
-            $settings['templateText'] ?? null,
+            name: $settings['name'],
+            label: $settings['label'],
+            category: !empty($settings['category']) ? CategoryEnum::tryFrom($settings['category']) : null,
+            documents: $settings['documents'] ?? [],
+            spool: $settings['spool'] ?? false,
+            priority: $settings['priority'] ?? 0,
+            subject: $settings['subject'] ?? null,
+            templateHtml: $settings['templateHtml'] ?? null,
+            templateText: $settings['templateText'] ?? null,
         );
     }
 }
