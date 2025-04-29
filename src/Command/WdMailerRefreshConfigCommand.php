@@ -12,6 +12,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use WebEtDesign\MailerBundle\Doctrine\MailRepository;
+use WebEtDesign\MailerBundle\Entity\Mail;
 use WebEtDesign\MailerBundle\Services\MailEventManager;
 use WebEtDesign\MailerBundle\Services\MailHelper;
 
@@ -56,12 +57,29 @@ class WdMailerRefreshConfigCommand extends Command
             return Command::FAILURE;
         }
 
+        /** @var Mail $mail */
         $mail = $this->mailRepository->findOneByEvent($event);
 
         if (empty($mail)) {
             $io->error('Mail configuration not found !');
 
             return Command::FAILURE;
+        }
+
+        $mail->setCategory($config->category);
+
+        foreach ($mail->getDocuments() as $document) {
+            $mail->removeDocument($document);
+        }
+
+        foreach ($config->documents as $model) {
+            $document = $this->mailRepository->findOneBy(['model' => $model]);
+            if ($document === null) {
+                $io->error(sprintf('[%s] No document found for : %s ', $event, $model));
+                continue;
+            }
+
+            $mail->addDocument($document);
         }
 
         $this->mailHelper->initTranslationObjects($mail, true);
