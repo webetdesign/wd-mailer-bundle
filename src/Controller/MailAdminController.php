@@ -4,16 +4,23 @@ declare(strict_types=1);
 
 namespace WebEtDesign\MailerBundle\Controller;
 
-use Sonata\AdminBundle\Controller\CRUDController;
+use App\Controller\Admin\SoftDeleteAdminController;
+use App\SoftDelete\Service\SoftDeleteService;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use WebEtDesign\MailerBundle\Entity\Mail;
 use WebEtDesign\MailerBundle\Services\EmailBuilder;
 
-final class MailAdminController extends CRUDController
+final class MailAdminController extends SoftDeleteAdminController
 {
-    public function __construct(private readonly EmailBuilder $emailBuilder)
+    public function __construct(
+        private readonly EmailBuilder $emailBuilder,
+        private readonly RequestStack $requestStack,
+        private readonly SoftDeleteService $softDeleteService
+    )
     {
+        parent::__construct($softDeleteService, $requestStack);
     }
 
     public function livePreviewAction(Request $request, Mail $mail, string $mode, string $locale): Response

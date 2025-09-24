@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace WebEtDesign\MailerBundle\Admin;
 
 use A2lix\TranslationFormBundle\Form\Type\TranslationsFormsType;
+use App\Enum\Filter\ArchivedEnum;
+use App\SoftDelete\Service\SoftDeleteRepositoryUtils;
 use JetBrains\PhpStorm\Pure;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridInterface;
@@ -14,6 +16,7 @@ use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Route\RouteCollectionInterface;
 use Sonata\AdminBundle\Show\ShowMapper;
 use Sonata\AdminBundle\Translator\UnderscoreLabelTranslatorStrategy;
+use Sonata\DoctrineORMAdminBundle\Filter\CallbackFilter;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -45,10 +48,23 @@ final class MailAdmin extends AbstractAdmin
         $this->setLabelTranslatorStrategy(new UnderscoreLabelTranslatorStrategy());
     }
 
+    protected function configureDefaultFilterValues(array &$filterValues): void
+    {
+        $filterValues['archivedAt'] = [
+            'type'  => null,
+            'value' => ArchivedEnum::NO->value,
+        ];
+    }
+
     protected function configureRoutes(RouteCollectionInterface $collection): void
     {
+        $collection->remove('delete');
+
         $collection->add('test', 'test/{id}');
         $collection->add('live_preview', '{id}/live_preview/{mode}/{locale}');
+
+        $collection->add('archive', $this->getRouterIdParameter().'/archive');
+        $collection->add('restore', $this->getRouterIdParameter().'/restore');
     }
 
     /**
@@ -83,7 +99,24 @@ final class MailAdmin extends AbstractAdmin
             ->add('name')
             ->add('event')
             ->add('to')
-            ->add('from');
+            ->add('from')
+            ->add('archivedAt', CallbackFilter::class, [
+                'label'         => 'Archivé',
+                'callback'      => function ($queryBuilder, $alias, $field, $value) {
+                    if (empty($value->getValue())) {
+                        return false;
+                    }
+
+                    SoftDeleteRepositoryUtils::whereClause($queryBuilder, $alias, $value->getValue());
+
+                    return true;
+                },
+                'field_type' => EnumType::class,
+                'field_options' => [
+                    'choice_label' => fn(ArchivedEnum $type) => $type->label(),
+                    'class' => ArchivedEnum::class,
+                ],
+            ]);
     }
 
     protected function configureListFields(ListMapper $listMapper): void
@@ -98,11 +131,16 @@ final class MailAdmin extends AbstractAdmin
         $listMapper
             ->add('category', null, ['template' => '@WDMailer/admin/mail/list__field_category.html.twig'])
             ->add('to', null, ['template' => '@WDMailer/admin/mail/list__field_from_to.html.twig'])
+            ->add('archivedAt', null, [
+                'template' => 'admin/CRUD/common/list_field_archived_at.html.twig',
+            ])
             ->add(ListMapper::NAME_ACTIONS, null, [
                 'actions' => [
                     //                    'show'   => [],
                     'edit'   => [],
-                    'delete' => [],
+                    'archive' => [
+                        'template' => 'admin/CRUD/common/list__action_archive.html.twig',
+                    ],
 //                    'test'   => [
 //                        'template' => '@WDMailer/admin/mail/list__action_test.html.twig',
 //                    ],
