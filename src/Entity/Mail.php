@@ -3,6 +3,8 @@
 namespace WebEtDesign\MailerBundle\Entity;
 
 use App\Entity\Client\Client;
+use App\SoftDelete\Entity\SoftDeleteEntityInterface;
+use App\SoftDelete\Entity\SoftDeleteEntityTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -20,9 +22,10 @@ use WebEtDesign\MailerBundle\Enum\CategoryEnum;
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'mailer__mail')]
-class Mail implements TranslatableInterface
+class Mail implements TranslatableInterface, SoftDeleteEntityInterface
 {
     use TranslatableTrait;
+    use SoftDeleteEntityTrait;
 
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]
