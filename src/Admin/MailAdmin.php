@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WebEtDesign\MailerBundle\Admin;
 
 use A2lix\TranslationFormBundle\Form\Type\TranslationsFormsType;
+use App\SoftDelete\Admin\SoftDeleteAdminTrait;
 use JetBrains\PhpStorm\Pure;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridInterface;
@@ -27,6 +28,7 @@ use WebEtDesign\MailerBundle\Util\ObjectConverter;
 
 final class MailAdmin extends AbstractAdmin
 {
+    use SoftDeleteAdminTrait;
     private array $mailEvents;
 
     public function __construct(
@@ -49,6 +51,8 @@ final class MailAdmin extends AbstractAdmin
     {
         $collection->add('test', 'test/{id}');
         $collection->add('live_preview', '{id}/live_preview/{mode}/{locale}');
+
+        $this->configureArchiveRoutes($collection);
     }
 
     /**
@@ -84,6 +88,8 @@ final class MailAdmin extends AbstractAdmin
             ->add('event')
             ->add('to')
             ->add('from');
+
+        $this->configureArchiveFilter($datagridMapper);
     }
 
     protected function configureListFields(ListMapper $listMapper): void
@@ -97,15 +103,14 @@ final class MailAdmin extends AbstractAdmin
         }
         $listMapper
             ->add('category', null, ['template' => '@WDMailer/admin/mail/list__field_category.html.twig'])
-            ->add('to', null, ['template' => '@WDMailer/admin/mail/list__field_from_to.html.twig'])
-            ->add(ListMapper::NAME_ACTIONS, null, [
+            ->add('to', null, ['template' => '@WDMailer/admin/mail/list__field_from_to.html.twig']);
+
+        $this->configureArchiveListField($listMapper);
+
+        $listMapper->add(ListMapper::NAME_ACTIONS, null, [
                 'actions' => [
-                    //                    'show'   => [],
                     'edit'   => [],
-                    'delete' => [],
-//                    'test'   => [
-//                        'template' => '@WDMailer/admin/mail/list__action_test.html.twig',
-//                    ],
+                    ...self::LIST_ACTION_ARCHIVE
                 ],
             ]);
     }
