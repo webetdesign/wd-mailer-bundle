@@ -15,17 +15,20 @@ use WebEtDesign\MailerBundle\Services\EmailBuilder;
 final class MailAdminController extends SoftDeleteAdminController
 {
     public function __construct(
-        private readonly EmailBuilder $emailBuilder,
         SoftDeleteService $softDeleteService,
-        RequestStack $requestStack
+        RequestStack $requestStack,
+        private readonly EmailBuilder $emailBuilder,
     )
     {
         parent::__construct($softDeleteService, $requestStack);
     }
 
+    /**
+     * @throws \JsonException
+     */
     public function livePreviewAction(Request $request, Mail $mail, string $mode, string $locale): Response
     {
-        $content = !empty($request->getContent()) ? json_decode($request->getContent(), true) : null;
+        $content = !empty($request->getContent()) ? json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR) : null;
 
         $update = $content['update'] ?? null;
 

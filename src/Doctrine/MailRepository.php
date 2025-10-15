@@ -17,7 +17,6 @@ use WebEtDesign\MailerBundle\Entity\Mail;
 class MailRepository extends ServiceEntityRepository implements SoftDeleteRepositoryInterface
 {
     use SoftDeleteRepositoryTrait;
-
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Mail::class);
