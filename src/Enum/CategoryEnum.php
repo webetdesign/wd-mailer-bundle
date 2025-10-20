@@ -9,7 +9,7 @@ enum CategoryEnum: string
     case SALE_ORDER_EMAIL = 'SALE_ORDER_EMAIL';
     case SALE_ORDER_EMAIL_CANCEL = 'SALE_ORDER_EMAIL_CANCEL';
     case WORK_TICKET = 'WORK_TICKET';
-    case CONTRACT_BID = 'CONTRACT_BID';
+    case BID = 'BID';
 
     public function label(): string
     {
@@ -18,7 +18,7 @@ enum CategoryEnum: string
             self::SALE_ORDER_EMAIL, self::SALE_ORDER_EMAIL_CANCEL => 'Email commande de vente',
             self::PRICE_CAMPAIGN_PRODUCT => 'Campagne de prix produits',
             self::WORK_TICKET => 'Bons de travail',
-            self::CONTRACT_BID => 'Offre',
+            self::BID => 'Offre',
         };
     }
 }
