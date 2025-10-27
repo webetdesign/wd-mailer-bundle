@@ -10,6 +10,7 @@ enum CategoryEnum: string
     case SALE_ORDER_EMAIL_CANCEL = 'SALE_ORDER_EMAIL_CANCEL';
     case WORK_TICKET = 'WORK_TICKET';
     case BID = 'BID';
+    case QUOTE = 'QUOTE';
 
     public function label(): string
     {
@@ -19,6 +20,7 @@ enum CategoryEnum: string
             self::PRICE_CAMPAIGN_PRODUCT => 'Campagne de prix produits',
             self::WORK_TICKET => 'Bons de travail',
             self::BID => 'Offre',
+            self::QUOTE => 'Devis',
         };
     }
 }
