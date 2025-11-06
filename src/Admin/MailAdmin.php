@@ -263,7 +263,7 @@ final class MailAdmin extends AbstractAdmin
         $events  = $this->getMailEvents();
         $choices = [];
         foreach ($events as $key => $event) {
-            $choices[$key] = $event['label'] ?? $key;
+            $choices[$key] = $event->label ?? $key;
         }
 
         return array_flip($choices);
