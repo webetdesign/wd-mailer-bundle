@@ -11,6 +11,7 @@ enum CategoryEnum: string
     case WORK_TICKET = 'WORK_TICKET';
     case BID = 'BID';
     case QUOTE = 'QUOTE';
+    case CONTRACT_LINE_PRICING = 'CONTRACT_LINE_PRICING';
 
     public function label(): string
     {
@@ -21,6 +22,7 @@ enum CategoryEnum: string
             self::WORK_TICKET => 'Bons de travail',
             self::BID => 'Offre',
             self::QUOTE => 'Devis',
+            self::CONTRACT_LINE_PRICING => 'Modification des tarifs d\'une ligne de contrat',
         };
     }
 }
