@@ -60,13 +60,17 @@ readonly class MailHelper
         $path = preg_replace('/\{locale\}/', $locale, $path);
 
         try {
-            $wrapper = $this->twig->load($path);
+            // Fetch the raw template source directly from the loader.
+            // In production, Twig's compiled templates may not embed the source code,
+            // so calling getSourceContext() on a TemplateWrapper can return an empty code string.
+            // Using the loader ensures we always get the actual file contents.
+            $source = $this->twig->getLoader()->getSourceContext($path);
         } catch (LoaderError|RuntimeError|SyntaxError $e) {
             // TODO handle exception
             return null;
         }
 
-        return $wrapper->getSourceContext()->getCode();
+        return $source->getCode();
     }
 
 }
