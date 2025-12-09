@@ -72,6 +72,10 @@ readonly class EmailBuilder
             $email->addTo($address);
         }
 
+        foreach ($this->getRecipients($mail, $mail->getToAsArray()) as $recipient) {
+            $email->addTo($recipient);
+        }
+
         foreach ($mailDto->getRecipientCC()->getAddresses() as $address) {
             $email->addCc($address);
         }
