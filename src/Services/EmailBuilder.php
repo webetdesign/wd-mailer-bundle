@@ -92,6 +92,14 @@ readonly class EmailBuilder
             }
         }
 
+        foreach ($mailDto->getAttachments() as $attachment) {
+            if ($attachment instanceof UploadedFile) {
+                $email->attachFromPath($attachment->getRealPath(), $attachment->getClientOriginalName());
+            } else {
+                $email->attachFromPath($attachment->getRealPath(), $attachment->getFileName());
+            }
+        }
+
         return $email;
     }
 
