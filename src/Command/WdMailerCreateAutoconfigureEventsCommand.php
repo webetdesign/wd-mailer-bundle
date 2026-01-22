@@ -84,7 +84,7 @@ class WdMailerCreateAutoconfigureEventsCommand extends Command
             foreach ($mailEvent->documents as $model) {
                 $document = $this->documentRepository->findOneBy(['model' => $model]);
                 if ($document === null) {
-                    $io->error(sprintf('[%s] No document found for : %s ', $event, $model));
+                    $io->error(\sprintf('[%s] No document found for : %s ', $event, $model));
                     continue;
                 }
 
