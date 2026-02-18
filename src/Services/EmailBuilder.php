@@ -205,11 +205,11 @@ readonly class EmailBuilder
         return str_replace(array_keys($vars), array_values($vars), $title);
     }
 
-    public function getEmailDto(Mail $mail, MailEventInterface $event): EmailComposerDTO
+    public function getEmailDto(Mail $mail, MailEventInterface $event, string $class = EmailComposerDTO::class): EmailComposerDTO
     {
         $locale = $event->getLocale() ?? 'fr';
 
-        $dto = new EmailComposerDTO();
+        $dto = new $class();
 
         $values = ObjectConverter::convertToArray($event);
 
