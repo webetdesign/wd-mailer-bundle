@@ -14,7 +14,7 @@
     "a2lix/translation-form-bundle": "^3.0",
     "doctrine/doctrine-bundle": "^1.12 || ^2.0 || ^3.0",
     "doctrine/orm": "^2.6.4 || ^3.0",
-    "knplabs/doctrine-behaviors": "^2.0",
+    "knplabs/doctrine-behaviors": "^3.1",
     "symfony/dependency-injection": "^5.4 || ^6.0 || ^7.0",
     "symfony/form": "^5.4 || ^6.0 || ^7.0",
     "symfony/mailer": "5.4.* || ^6.0 || ^7.0"
