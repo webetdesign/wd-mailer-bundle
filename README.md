@@ -94,7 +94,13 @@ use WebEtDesign\MailerBundle\Event\AbstractMailEvent;use WebEtDesign\MailerBundl
 use WebEtDesign\MailerBundle\Attribute\MailEvent;
 use Symfony\Component\HttpFoundation\File\File;
 
-#[MailEvent(name: self::USER_CREATED, label: 'Utlisateur créé')]
+#[MailEvent(
+    name: self::USER_CREATED,
+    label: 'Utlisateur créé',
+    subject: 'Bienvenue',
+    templateHtml: '@App/emails/user_created.{locale}.html.twig',
+    templateText: '@App/emails/user_created.{locale}.txt.twig'
+)]
 class UserCreateEvent extends AbstractMailEvent
 {
     public const USER_CREATED = 'USER_CREATED';
@@ -123,6 +129,8 @@ class UserCreateEvent extends AbstractMailEvent
 }
 ```
 Each getter will be used to determine the name of a variable in the template. In this example, there will be 2 variables, "user" and "email" that will be directly injected in the template.
+
+Transport settings such as `from`, `from_name`, `to` and `reply_to` remain configured in `wd_mailer.auto_configure_events`. The `MailEvent` attribute is used for event metadata and templates.
 
 ## Dispatch event
 
