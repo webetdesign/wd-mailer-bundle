@@ -46,7 +46,6 @@ final class MailAdmin extends AbstractAdmin
 
     protected function configureRoutes(RouteCollectionInterface $collection): void
     {
-        $collection->add('test', 'test/{id}');
         $collection->add('live_preview', '{id}/live_preview/{mode}/{locale}');
     }
 
@@ -55,14 +54,6 @@ final class MailAdmin extends AbstractAdmin
      */
     protected function configureActionButtons(array $buttonList, string $action, ?object $object = null): array
     {
-        if (in_array($action, ['show', 'edit'], true)
-            && $this->hasRoute('test')
-        ) {
-            $buttonList['test'] = [
-                'template' => $this->getTemplateRegistry()->getTemplate('button_test'),
-            ];
-        }
-
         return $buttonList;
     }
 
