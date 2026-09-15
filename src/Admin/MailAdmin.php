@@ -182,7 +182,7 @@ final class MailAdmin extends AbstractAdmin
             ->add('title')
             ->add('contentHtml')
             ->add('contentTxt')
-            ->add('attachments');
+            ->add('fromName');
     }
 
     public function getMailEvents(): array
