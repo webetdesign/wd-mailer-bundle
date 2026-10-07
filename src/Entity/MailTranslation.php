@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace WebEtDesign\MailerBundle\Entity;
 
+use A2lix\TranslationFormBundle\Helper\OneLocaleInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslationInterface;
@@ -10,7 +11,7 @@ use Knp\DoctrineBehaviors\Model\Translatable\TranslationTrait;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'mailer__mail_translation')]
-class MailTranslation implements TranslationInterface
+class MailTranslation implements TranslationInterface, OneLocaleInterface
 {
     use TranslationTrait;
 
@@ -27,6 +28,20 @@ class MailTranslation implements TranslationInterface
 
     #[ORM\Column(name: 'content_txt', type: Types::TEXT, nullable: true)]
     private ?string $contentTxt = null;
+
+    /**
+     * a2lix/translation-form-bundle 4 assigns the locale of a submitted
+     * translation with `$translation->locale = $locale`, while the Knp trait
+     * declares the property protected.
+     */
+    public function __set(string $name, mixed $value): void
+    {
+        if ('locale' !== $name) {
+            throw new \LogicException(sprintf('Cannot set inaccessible property %s::$%s.', self::class, $name));
+        }
+
+        $this->setLocale($value);
+    }
 
     /**
      * @return int|null

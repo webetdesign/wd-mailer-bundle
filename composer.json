@@ -9,11 +9,11 @@
         }
     ],
     "require": {
-        "a2lix/translation-form-bundle": "^3.0",
+        "a2lix/translation-form-bundle": "^4.0",
         "doctrine/doctrine-bundle": "^1.12 || ^2.0",
         "doctrine/orm": "^2.6.4 || ^3.0",
         "knplabs/doctrine-behaviors": "^3.0",
-        "php": "^7.4|^8.0",
+        "php": "^8.4",
         "symfony/dependency-injection": "^7.4",
         "symfony/form": "^7.4",
         "symfony/mailer": "^7.4",

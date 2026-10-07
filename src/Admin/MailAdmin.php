@@ -152,8 +152,8 @@ final class MailAdmin extends AbstractAdmin
                 ->with('Contenu', ['class' => 'col-md-12', 'box_class' => 'header_none'])
                 ->add('translations', TranslationsFormsType::class, [
                     'label'            => false,
-                    'locales'          => $locales,
-                    'default_locale'   => [$locale],
+                    'enabled_locales'  => $locales,
+                    'default_locale'   => $locale,
                     'required_locales' => [$locale],
                     'form_type'        => MailContentsTranslationType::class
                 ])

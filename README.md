@@ -55,10 +55,9 @@ config dependency bundle
 ```yaml
 # config/packages/a2lix.yaml
 a2lix_translation_form:
-  locale_provider: default
-  locales: '%wd_mailer.locales%'
+  enabled_locales: '%wd_mailer.locales%'
   default_locale: '%wd_mailer.default_locale%'
-  templating: "@A2lixTranslationForm/bootstrap_3_layout.html.twig"
+  templating: "@A2lixTranslationForm/native_layout.html.twig"
 ```
 ```yaml
 # config/packages/norzechowicz_ace_editor.yaml
