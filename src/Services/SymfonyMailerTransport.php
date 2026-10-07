@@ -36,7 +36,7 @@ readonly class SymfonyMailerTransport
         $this->eventDispatcher->dispatch(new EmailSentEvent($event), EmailSentEvent::NAME);
     }
 
-    private function logData(string $eventName, Email $email, Exception $exception = null): array
+    private function logData(string $eventName, Email $email, ?Exception $exception = null): array
     {
         $data = [
             'event_name' => $eventName,
